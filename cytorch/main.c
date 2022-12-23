@@ -4,5 +4,5 @@
 
 int main() {
     // tensor_t my_tensor = _new_tensor(4, 5);
-    // DEBUG_ASSERT(0, "Oh no, %d\n", 3);
+    DEBUG_ASSERT(0, "Oh no, %d\n", 3);
 }
