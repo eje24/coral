@@ -1,8 +1,6 @@
 # cytorch
 
-Drawbacks:
-- no generic programming: hard to easily create tensors for different types. for now we'll just stick to floats
-- sizes are two dimensional (hard to make variable number of arguments
+A PyTorch-inspired deep learning framework in C.
 
 TODO:
 - allow for broadcasting of different but compatible sizes (similar to numpy)
@@ -15,3 +13,9 @@ TODO:
 
 NOTES:
 - static inlining vs macro for "short" tensor functions?? current approach is to use macros for short debugging functions (eg in-bounds checks)
+- apparently cytorch is already taken (it also sounds weird). possible other names:
+    - breeze
+    - c-torch (concise but uninspiring, current best)
+    - libtorch (apparently already a thing: https://g-airborne.com/bringing-your-deep-learning-model-to-production-with-libtorch-part-1-why-libtorch/)
+    - some element or chemical classification (eg Neon, Halide (taken), etc)
+          - tbd
