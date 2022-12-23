@@ -2,10 +2,6 @@
 
 A PyTorch-inspired deep learning framework in C.
 
-Drawbacks:
-- no generic programming: hard to easily create tensors for different types. for now we'll just stick to floats
-- sizes are two dimensional (hard to make variable number of arguments
-
 TODO:
 - allow for broadcasting of different but compatible sizes (similar to numpy)
 - be consistent about using tensor vs tensor* for static inlined tensor functions (which is better?)
