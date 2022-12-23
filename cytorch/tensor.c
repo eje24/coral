@@ -20,22 +20,30 @@ static inline size_t _tensor_get_size_in_bytes(tensor_t tensor){
     return _tensor_get_size(tensor) * sizeof(tensor_entry_t);
 }
 
-static inline tensor_entry_t _tensor_get_entry(tensor_t tensor, tensor_size_t index, tensor_entry_t value){
-    DEBUG_ASSERT(!TENSOR_IN_BOUNDS_ROW_COLUMN(tensor, row, column));
+/**
+ * GETTERS, SETTERS, AND CONSTRUCTORS
+*/
+
+static inline tensor_entry_t _tensor_get_entry(tensor_t tensor, tensor_size_t index){
+    DEBUG_ASSERT(!TENSOR_IN_BOUNDS_INDEX(tensor, index));
     return tensor.data[index];
 }
 
-// returns 0 if unsucessful, otherwise 1
-static inline void _tensor_set_entry(tensor_t tensor, tensor_size_t index, tensor_entry_t value){
-    DEBUG_ASSERT(!TENSOR_IN_BOUNDS_INDEX(tensor, index));
-    tensor.data[index] = value;
-    return 1;
+static inline tensor_entry_t _tensor_get_entry_row_column(tensor_t tensor, tensor_size_t row, tensor_size_t column){
+    DEBUG_ASSERT(!TENSOR_IN_BOUNDS_ROW_COLUMN(tensor, row, column));
+    tensor_size_t index = row * tensor.num_columns + column;
+    return tensor.data[index];
 }
 
-static inline void _tensor_set_entry_row_column(tensor_t tensor, tensor_size_t row, tensor_size_t column, tensor_entry_t value){
+static inline void _tensor_set_entry(tensor_t* tensor, tensor_size_t index, tensor_entry_t value){
+    DEBUG_ASSERT(!TENSOR_IN_BOUNDS_INDEX(tensor, index));
+    tensor->data[index] = value;
+}
+
+static inline void _tensor_set_entry_row_column(tensor_t* tensor, tensor_size_t row, tensor_size_t column, tensor_entry_t value){
     DEBUG_ASSERT(!TENSOR_IN_BOUNDS(tensor, row, column));
-    tensor_size_t index = row * tensor.num_columns + column;
-    _tensor_set_entry(tensor, index, value);
+    tensor_size_t index = row * tensor->num_columns + column;
+    tensor->data[index] = value;
 }
 
 // create new tensor
@@ -62,6 +70,39 @@ tensor_t _copy_tensor(tensor_t old_tensor){
     memcpy(new_tensor.data, old_tensor.data, _tensor_get_size_in_bytes(old_tensor));
     return new_tensor;
 }
+
+void _populate_tensor(tensor_t* tensor, tensor_row_column_fn_t row_column_fn){
+    for(tensor_size_t row = 0; row < tensor->num_rows; row++){
+        for(tensor_size_t column = 0; column < tensor->num_columns; column++){
+            tensor_entry_t new_entry = (*row_column_fn)(row, column);
+            _tensor_set_entry_row_column(tensor, row, column, new_entry);
+        }
+    }
+}
+
+/**
+ * PRINTING
+*/
+
+void display_tensor(tensor_t tensor){
+    printf("Tensor:\n");
+    for(tensor_size_t row = 0; row < tensor.num_rows; row++){
+        for(tensor_size_t column = 0; column < tensor.num_columns; column++){
+            printf("%f ", _tensor_get_entry_row_column(tensor, row_column));
+        }
+        printf("\n");
+    }
+    printf("num_rows: %lu\n", tensor->num_rows);
+    prinf("num_columns: %lu\n", tensor->num_columns);
+}
+
+/**
+ * VIEWS - TODO
+*/
+
+/**
+ *  FUNCTIONS
+*/
 
 // returns true if and only if tensor dimensions match exactly
 // used as a pre-check for component-wise operations
