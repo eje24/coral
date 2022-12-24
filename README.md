@@ -17,6 +17,7 @@ NOTES:
 - static inlining vs macro for "short" tensor functions?? current approach is to use macros for short debugging functions (eg in-bounds checks)
 - apparently cytorch is already taken (it also sounds weird). possible other names:
     - breeze
+    - grad
     - c-torch (concise but uninspiring, current best)
     - libtorch (apparently already a thing: https://g-airborne.com/bringing-your-deep-learning-model-to-production-with-libtorch-part-1-why-libtorch/)
     - some element or chemical classification (eg Neon, Halide (taken), etc)
