@@ -1,4 +1,4 @@
-# CyTorch
+# grad
 
 A PyTorch-inspired deep learning framework in C.
 
