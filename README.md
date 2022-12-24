@@ -3,6 +3,8 @@
 A PyTorch-inspired deep learning framework in C.
 
 TODO:
+- change name
+- add link-time optimization (quick)
 - allow for broadcasting of different but compatible sizes (similar to numpy)
 - be consistent about using tensor vs tensor* for static inlined tensor functions (which is better?)
     - for now, pass by value (tensors are small, only stores pointer to data)
