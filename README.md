@@ -1,4 +1,4 @@
-# cytorch
+# CyTorch
 
 A PyTorch-inspired deep learning framework in C.
 
