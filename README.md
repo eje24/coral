@@ -3,7 +3,9 @@
 A PyTorch-inspired deep learning framework in C.
 
 TODO:
-- change name
+- change name (DONE)
+- add struct scalar_t, and make variable_t an extension
+- variadic update (tensors should be able to be initialized up to 3 dimensions)
 - add link-time optimization (quick)
 - allow for broadcasting of different but compatible sizes (similar to numpy)
 - be consistent about using tensor vs tensor* for static inlined tensor functions (which is better?)
