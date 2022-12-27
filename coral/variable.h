@@ -11,10 +11,10 @@ typedef struct {
     tensor_t* gradient;
 } variable_t;
 
-variable_t _new_variable_from_tensor(tensor_t* tensor);
-variable_t new_variable(tensor_size_t num_rows, tensor_size_t num_columns);
-variable_t new_variable_like(variable_t old_variable);
-variable_t copy_variable(variable_t old_variable);
+variable_t* _new_variable_from_tensor(tensor_t* tensor);
+variable_t* new_variable(uint8_t num_dims, ...);
+variable_t* new_variable_like(variable_t old_variable);
+variable_t* copy_variable(variable_t old_variable);
 
 void display_variable(variable_t variable);
 
