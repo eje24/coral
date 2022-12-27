@@ -5,7 +5,7 @@ A PyTorch-inspired deep learning framework in C.
 TODO:
 - change name (DONE)
 - ALL CONSTRUCTORS MUST ALLOCATE TO HEAP, NOT STACK!
-- variadic update (tensors should be able to be initialized up to 3 dimensions)
+- variadic update (tensors should be able to be initialized up to 3 dimensions) - DONE
     - external initializer is variadic
     - each of tensor, variable/scalar will have non-variadic initializers and variadic initializers 
     - internal initializer is non-variadic (pass in tensor_entry_t*)

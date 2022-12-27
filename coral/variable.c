@@ -15,7 +15,7 @@ variable_t* _new_variable_from_tensor(tensor_t* tensor){
     return new_variable;
 }
 
-variable_t* new_variable(uint8_t num_dims, ...){
+variable_t* new_variable(int num_dims, ...){
     // parse dim arguments
     tensor_size_t dims[TENSOR_MAX_DIMS];
     va_list dim_args;
@@ -44,11 +44,11 @@ variable_t* copy_variable(variable_t old_variable){
  * PRINTING
 */
 
-void display_variable(variable_t variable){
+void display_variable(variable_t* variable){
     printf("Tensor:\n");
-    _display_tensor(variable.tensor);
+    _display_tensor(variable->tensor);
     printf("Gradient:\n");
-    _display_tensor(variable.gradient);
+    _display_tensor(variable->gradient);
 }
 
 /**

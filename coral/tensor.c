@@ -28,7 +28,7 @@ static inline size_t _tensor_get_size_in_bytes(tensor_t* tensor){
 tensor_t* _new_tensor(uint8_t num_dims, tensor_size_t* dims){
     tensor_size_t tensor_size = _get_size_from_dims(num_dims, dims);
     tensor_entry_t* data = (tensor_entry_t*) calloc(tensor_size, sizeof(tensor_entry_t));
-    tensor_t* new_tensor = (tensor_t*) malloc(sizeof(tensor_t*));
+    tensor_t* new_tensor = (tensor_t*) malloc(sizeof(tensor_t));
     new_tensor->data = data;
     new_tensor->num_dims = num_dims;
     for(uint8_t dim_index = 0; dim_index < num_dims; dim_index++){
@@ -69,7 +69,7 @@ tensor_t* _copy_tensor(tensor_t* old_tensor){
 
 void _display_tensor_dim_1(tensor_t* tensor){
     printf("Dimensions: %llu\n", tensor->dims[0]);
-    for(tensor_size_t dim0_index = 0; dim0_index <= tensor->dims[0]; dim0_index++){
+    for(tensor_size_t dim0_index = 0; dim0_index < tensor->dims[0]; dim0_index++){
         printf("%f ", tensor->data[dim0_index]);
     }
     printf("\n");
@@ -77,8 +77,8 @@ void _display_tensor_dim_1(tensor_t* tensor){
 
 void _display_tensor_dim_2(tensor_t* tensor){
     printf("Dimensions: %llu x %llu\n", tensor->dims[0], tensor->dims[1]);
-    for(tensor_size_t dim0_index = 0; dim0_index <= tensor->dims[0]; dim0_index++){
-        for(tensor_size_t dim1_index = 0; dim1_index <= tensor->dims[1]; dim1_index++){
+    for(tensor_size_t dim0_index = 0; dim0_index < tensor->dims[0]; dim0_index++){
+        for(tensor_size_t dim1_index = 0; dim1_index < tensor->dims[1]; dim1_index++){
             tensor_size_t index = dim0_index * tensor->dims[1] + dim1_index;
             printf("%f ", tensor->data[index]);
         }
@@ -88,9 +88,9 @@ void _display_tensor_dim_2(tensor_t* tensor){
 
 void _display_tensor_dim_3(tensor_t* tensor){
     printf("Dimensions: %llu x %llu x %llu\n", tensor->dims[0], tensor->dims[1], tensor->dims[2]);
-    for(tensor_size_t dim0_index = 0; dim0_index <= tensor->dims[0]; dim0_index++){
-        for(tensor_size_t dim1_index = 0; dim1_index <= tensor->dims[1]; dim1_index++){
-            for(tensor_size_t dim2_index = 0; dim2_index <= tensor->dims[2]; dim2_index++){
+    for(tensor_size_t dim0_index = 0; dim0_index < tensor->dims[0]; dim0_index++){
+        for(tensor_size_t dim1_index = 0; dim1_index < tensor->dims[1]; dim1_index++){
+            for(tensor_size_t dim2_index = 0; dim2_index < tensor->dims[2]; dim2_index++){
                 tensor_size_t index = dim0_index * tensor->dims[1] * tensor->dims[2] + dim1_index * tensor->dims[2] + dim2_index;
                 printf("%f ", tensor->data[index]);
             }
@@ -106,10 +106,10 @@ void _display_tensor(tensor_t* tensor){
             _display_tensor_dim_1(tensor);
             break;
         case 2:
-            _display_tesnor_dim_2(tensor);
+            _display_tensor_dim_2(tensor);
             break;
         case 3:
-            _display_tensor_dim_2(tensor);
+            _display_tensor_dim_3(tensor);
             break;
     }
 }
@@ -152,9 +152,9 @@ bool _tensor_broadcast_componentwise_compatible(tensor_t* left_tensor, tensor_t*
 }
 
 // TODO
-bool _tensor_broadcast_matmul_compatible(tensor_t* left_tensor, tensor_t* right_tensor){
-    return 1;
-}
+// bool _tensor_broadcast_matmul_compatible(tensor_t* left_tensor, tensor_t* right_tensor){
+//     return 1;
+// }
 
 // returns true if and only if internal dimensions match
 // so that left_tensor @ right_tensor is a valid matrix multiplication
