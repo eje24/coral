@@ -54,15 +54,33 @@ tensor_t* _copy_tensor(tensor_t* old_tensor){
     return new_tensor;
 }
 
-// void _populate_tensor(tensor_t* tensor, tensor_row_column_fn_t row_column_fn){
-//     for(tensor_size_t row = 0; row < tensor->num_rows; row++){
-//         for(tensor_size_t column = 0; column < tensor->num_columns; column++){
-//             tensor_entry_t new_entry = (*row_column_fn)(row, column);
-//             _tensor_set_entry_row_column(tensor, row, column, new_entry);
-//         }
-//     }
-// }
+/**
+ * NON-INLINED SETTERS
+*/
 
+void _tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value){
+    tensor_size_t tensor_size = _tensor_get_size(tensor);
+    for(tensor_size_t index = 0; index < tensor_size; index++){
+        _tensor_set_entry(tensor, index, value);
+    }
+}
+
+void _tensor_set_to_index_fn_value(tensor_t* tensor, tensor_index_fn_t index_fn){
+    tensor_size_t tensor_size = _tensor_get_size(tensor);
+    for(tensor_size_t index = 0; index < tensor_size; index++){
+        tensor_entry_t entry_value = (*index_fn)(index);
+        _tensor_set_entry(tensor, index, entry_value);
+    }
+}
+
+void _tensor_set_to_entry_fn_value(tensor_t* tensor, tensor_entry_unary_fn_t entry_fn){
+    tensor_size_t tensor_size = _tensor_get_size(tensor);
+    for(tensor_size_t index = 0; index < tensor_size; index++){
+        tensor_entry_t entry_old_value = _tensor_get_entry(tensor, index);
+        tensor_entry_t entry_new_value = (*entry_fn)(entry_old_value);
+        _tensor_set_entry(tensor, index, entry_new_value);
+    }
+}
 /**
  * PRINTING
 */
@@ -175,11 +193,11 @@ static inline tensor_entry_t _scalar_subtract(tensor_entry_t left_scalar, tensor
 }
 
 // TODO : allow for broadcasting of different sizes
-static inline tensor_t* _tensor_broadcast_scalar_fn(tensor_t* left_tensor, tensor_t* right_tensor, tensor_entry_fn_t tensor_scalar_fn){
-    DEBUG_ASSERT(_tensor_broadcast_compatible(left_tensor, right_tensor), "Tensors are not broadcast compatible!\n");
+static inline tensor_t* _tensor_broadcast_scalar_fn(tensor_t* left_tensor, tensor_t* right_tensor, tensor_entry_binary_fn_t tensor_entry_fn){
+    DEBUG_ASSERT(_tensor_broadcast_componentwise_compatible(left_tensor, right_tensor), "Tensors are not broadcast compatible!\n");
     // ensure that left_tensor->num_dims >= right_tensor->num_dims
     if(left_tensor->num_dims < right_tensor->num_dims){
-        return _tensor_broadcast_scalar_fn(right_tensor, left_tensor, tensor_scalar_fn);
+        return _tensor_broadcast_scalar_fn(right_tensor, left_tensor, tensor_entry_fn);
     }
     tensor_t* large_tensor = left_tensor;
     tensor_t* small_tensor = right_tensor;
@@ -196,7 +214,7 @@ static inline tensor_t* _tensor_broadcast_scalar_fn(tensor_t* left_tensor, tenso
             tensor_size_t large_index = _large_index + small_inner_index;
             tensor_entry_t large_entry = _tensor_get_entry(large_tensor, large_index);
             tensor_entry_t small_entry = _tensor_get_entry(small_tensor, small_inner_index);
-            tensor_entry_t new_entry = (*tensor_scalar_fn)(large_entry, small_entry);
+            tensor_entry_t new_entry = (*tensor_entry_fn)(large_entry, small_entry);
             _tensor_set_entry(new_tensor, large_index, new_entry);
         }
     }

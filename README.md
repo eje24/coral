@@ -3,28 +3,25 @@
 A PyTorch-inspired deep learning framework in C.
 
 TODO:
-- change name (DONE)
-- ALL CONSTRUCTORS MUST ALLOCATE TO HEAP, NOT STACK!
-- variadic update (tensors should be able to be initialized up to 3 dimensions) - DONE
-    - external initializer is variadic
-    - each of tensor, variable/scalar will have non-variadic initializers and variadic initializers 
-    - internal initializer is non-variadic (pass in tensor_entry_t*)
-- add struct scalar_t, and make variable_t an extension
-- add link-time optimization (quick)
-- allow for broadcasting of different but compatible sizes (similar to numpy)
-- be consistent about using tensor vs tensor* for static inlined tensor functions (which is better?)
-    - for now, pass by value (tensors are small, only stores pointer to data)
-    - for future: pass by reference for added flexibility (if we add more fields to tensor later)
-- buildout test suite
-- add in ability to populate tensor with function
-- add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns)
+- misc
+    - ✅ change name (DONE)
+- tensor
+    - 🏗️ assert that dimenions are correct/compatible when doing operations
+    - 🏗️ start test suite
+    - 🏗️ add struct constant_t, and make variable_t an extension
+    - 🏗️ enable link-time optimization (quick)
+    - extend tensor index/entry value lambda broadcasts to variable
+    - 🏗️ add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns)
+    - ✅ make everything heap-allocated
+    - ✅ variadic update (tensors should be able to be initialized up to 3 dimensions) - DONE
+    - ✅ allow for broadcasting of different but compatible sizes (similar to numpy) - DONE
+    - ✅ be consistent about using tensor vs tensor* for static inlined tensor functions (which is better? -> pointers)
+    - ✅ add in ability to populate tensor with function pointer
+        - ✅ index function
+        - ✅ entry value function
+- nn
+- utils
 
 NOTES:
 - static inlining vs macro for "short" tensor functions?? current approach is to use macros for short debugging functions (eg in-bounds checks)
-- apparently cytorch is already taken (it also sounds weird). possible other names:
-    - breeze
-    - grad
-    - c-torch (concise but uninspiring, current best)
-    - libtorch (apparently already a thing: https://g-airborne.com/bringing-your-deep-learning-model-to-production-with-libtorch-part-1-why-libtorch/)
-    - some element or chemical classification (eg Neon, Halide (taken), etc)
-          - tbd
+- avoid variadic functions when possible

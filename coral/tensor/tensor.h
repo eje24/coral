@@ -22,26 +22,16 @@ typedef struct {
 #define TENSOR_IN_BOUNDS_INDEX(tensor, index) (0 <= (index) && (index) < tensor->num_rows * tensor->num_columns)
 
 // entry x entry -> entry, applied component wise to create a new tensor from two existing ones
-typedef tensor_entry_t (* const tensor_entry_fn_t)(tensor_entry_t left_entry, tensor_entry_t right_entry);
+typedef tensor_entry_t (* const tensor_entry_binary_fn_t)(tensor_entry_t left_entry, tensor_entry_t right_entry);
+// entry -> entry, applied component wise to create a new tensor from two existing ones
+typedef tensor_entry_t (* const tensor_entry_unary_fn_t)(tensor_entry_t entry);
 // binary op: index: tensor_size_t -> entry: tensor_entry_t, used to populate a tensor
-typedef tensor_entry_t (* const tensor_tensor_fn_t)(tensor_size_t row, tensor_size_t index);
-// binary op: row: tensor_size_t x column: tensor_size_t -> entry: tensor_entry_t, used to populate a tensor
-typedef tensor_entry_t (* const tensor_row_column_fn_t)(tensor_size_t row, tensor_size_t column);
-
+typedef tensor_entry_t (* const tensor_index_fn_t)(tensor_size_t index);
 
 tensor_t* _new_tensor(uint8_t num_dims, tensor_size_t* dims);
 tensor_t* _new_tensor_like(tensor_t* old_tensor);
 tensor_t* _new_tensor_zeros_like(tensor_t* old_tensor);
 tensor_t* _copy_tensor(tensor_t* old_tensor);
-void _populate_tensor(tensor_t* tensor, tensor_row_column_fn_t row_column_fn);
-
-void _display_tensor(tensor_t* tensor);
-
-tensor_t* _tensor_add(tensor_t* left_tensor, tensor_t* right_tensor);
-tensor_t* _tensor_subtract(tensor_t* left_tensor, tensor_t* right_tensor);
-tensor_t* _tensor_multiply(tensor_t* left_tensor, tensor_t* right_tensor);
-
-
 
 /**
  * GETTERS AND SETTERS
@@ -57,5 +47,16 @@ static inline void _tensor_set_entry(tensor_t *tensor, tensor_size_t index, tens
     // DEBUG_ASSERT(!TENSOR_IN_BOUNDS_INDEX(tensor, index), "Out of bounds!\n");
     tensor->data[index] = value;
 }
+
+void _tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value);
+void _tensor_set_to_fn_value(tensor_t* tensor, tensor_index_fn_t index_fn);
+
+
+void _display_tensor(tensor_t* tensor);
+
+tensor_t* _tensor_add(tensor_t* left_tensor, tensor_t* right_tensor);
+tensor_t* _tensor_subtract(tensor_t* left_tensor, tensor_t* right_tensor);
+tensor_t* _tensor_multiply(tensor_t* left_tensor, tensor_t* right_tensor);
+
 
 #endif // TENSOR_H
