@@ -55,13 +55,29 @@ tensor_t* _copy_tensor(tensor_t* old_tensor){
 }
 
 /**
- * NON-INLINED SETTERS
+ * NON-INLINED SETTERS/MUTATORS
 */
 
 void _tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value){
     tensor_size_t tensor_size = _tensor_get_size(tensor);
     for(tensor_size_t index = 0; index < tensor_size; index++){
         _tensor_set_entry(tensor, index, value);
+    }
+}
+
+void _tensor_multiply_by_scalar_value(tensor_t* tensor, tensor_entry_t value){
+    tensor_size_t tensor_size = _tensor_get_size(tensor);
+    for(tensor_size_t index = 0; index < tensor_size; index++){
+        tensor_entry_t new_value = value * _tensor_get_entry(tensor, index);
+        _tensor_set_entry(tensor, index, new_value);
+    }
+}
+
+void _tensor_multiply_existing(tensor_t* multiplicand, tensor_t* multiplier){
+    tensor_size_t tensor_size = _tensor_get_size(multiplicand);
+    for(tensor_size_t index = 0; index < tensor_size; index++){
+        tensor_entry_t new_value = _tensor_get_entry(multiplicand, index) * _tensor_get_entry(multiplier, index);
+        _tensor_set_entry(multiplicand, index, new_value);
     }
 }
 
@@ -81,6 +97,8 @@ void _tensor_set_to_entry_fn_value(tensor_t* tensor, tensor_entry_unary_fn_t ent
         _tensor_set_entry(tensor, index, entry_new_value);
     }
 }
+
+
 /**
  * PRINTING
 */
@@ -172,12 +190,6 @@ bool _tensor_broadcast_componentwise_compatible(tensor_t* left_tensor, tensor_t*
 // TODO
 // bool _tensor_broadcast_matmul_compatible(tensor_t* left_tensor, tensor_t* right_tensor){
 //     return 1;
-// }
-
-// returns true if and only if internal dimensions match
-// so that left_tensor @ right_tensor is a valid matrix multiplication
-// static inline bool _tensor_internal_compatible(tensor_t* left_tensor, tensor_t* right_tensor){
-//     return (left_tensor->num_columns == right_tensor->num_rows);
 // }
 
 static inline tensor_entry_t _scalar_add(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {

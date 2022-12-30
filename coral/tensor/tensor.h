@@ -33,6 +33,12 @@ tensor_t* _new_tensor_like(tensor_t* old_tensor);
 tensor_t* _new_tensor_zeros_like(tensor_t* old_tensor);
 tensor_t* _copy_tensor(tensor_t* old_tensor);
 
+void _tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value);
+void _tensor_multiply_by_scalar_value(tensor_t* tensor, tensor_entry_t value);
+void _tensor_multiply_existing(tensor_t* multiplicand, tensor_t* multiplier);
+void _tensor_set_to_index_fn_value(tensor_t* tensor, tensor_index_fn_t index_fn);
+void _tensor_set_to_entry_fn_value(tensor_t* tensor, tensor_entry_unary_fn_t entry_fn);
+
 /**
  * GETTERS AND SETTERS
  * NOTE: in .h so they'll be inlined

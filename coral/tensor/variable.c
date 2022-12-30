@@ -64,21 +64,81 @@ void set_to_scalar(variable_t* variable, tensor_entry_t value){
  * FUNCTIONS
 */
 
-// performs component-wise addition
+void _unary_set_grad_meta(variable_t* child, variable_t* parent, variable_grad_op_t grad_op){
+    diff_arg_t* diff_arg = _new_diff_arg(parent, grad_op);
+    grad_meta_t* new_grad_meta = (grad_meta_t*) malloc(sizeof(grad_meta_t));
+    new_grad_meta->num_args = 1;
+    new_grad_meta->args[0] = diff_arg;
+}
+
+void _binary_set_grad_meta(variable_t* child, variable_t* parent1, variable_t* parent2, variable_binary_grad_op_t grad_op1, variable_binary_grad_op_t grad_op2){
+    diff_arg_t* diff_arg1 = _new_diff_arg(parent1, grad_op1);
+    diff_arg_t* diff_arg2 = _new_diff_arg(parent2, grad_op2);
+    grad_meta_t* new_grad_meta = (grad_meta_t*) malloc(sizeof(grad_meta_t));
+    new_grad_meta->num_args = 2;
+    new_grad_meta->args[0] = diff_arg1;
+    new_grad_meta->args[1] = diff_arg2;
+    child->grad_meta = new_grad_meta;
+}
+
 variable_t* add(variable_t* left_variable, variable_t* right_variable){
-    tensor_t* new_tensor = _tensor_add(left_variable->tensor, right_variable->tensor);
-    return _new_variable_from_tensor(new_tensor);
+    return _add(left_variable, right_variable, true);
 }
 
-// performs component-wise addition
 variable_t* subtract(variable_t* left_variable, variable_t* right_variable){
-    tensor_t* new_tensor = _tensor_subtract(left_variable->tensor, right_variable->tensor);
-    return _new_variable_from_tensor(new_tensor);
+    return _subtract(left_variable, right_variable, true);
+}
+
+variable_t* multiply(variable_t* left_variable, variable_t* right_variable){
+    return _multiply(left_variable, right_variable, true);
+}
+
+/**
+ * GRADIENTS: return grad with respect to arg, possible as a function of both arg and other_arg
+*/
+tensor_t* _add_grad(variable_t* arg, variable_t* other_arg, variable_t* child){
+    return _copy_tensor(child->gradient);
+}
+
+tensor_t* _subtract_grad(variable_t* arg, variable_t* other_arg, variable_t* child){
+    tensor_t* child_grad = _copy_tensor(child->gradient);
+    _tensor_multiply_by_scalar_value(child_grad, -1);
+    return child_grad;
+}
+
+tensor_t* _multiply_grad(variable_t* arg, variable_t* other_arg, variable_t* child){
+    tensor_t* arg_grad = _copy_tensor(child->gradient);
+    _tensor_multiply_existing(arg_grad, other_arg->tensor);
+    return arg_grad;
 }
 
 // performs component-wise addition
-variable_t* multiply(variable_t* left_variable, variable_t* right_variable){
+variable_t* _add(variable_t* left_variable, variable_t* right_variable, uint8_t use_grad){
+    tensor_t* new_tensor = _tensor_add(left_variable->tensor, right_variable->tensor);
+    variable_t* new_variable = _new_variable_from_tensor(new_tensor);
+    if(use_grad){
+        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_add_grad, &_add_grad);
+    } 
+    return new_variable;
+}
+
+// performs component-wise addition
+variable_t* _subtract(variable_t* left_variable, variable_t* right_variable, uint8_t use_grad){
+    tensor_t* new_tensor = _tensor_subtract(left_variable->tensor, right_variable->tensor);
+    variable_t* new_variable = _new_variable_from_tensor(new_tensor);
+    if(use_grad){
+        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_subtract_grad, &_subtract_grad);
+    } 
+    return new_variable;
+}
+
+// performs component-wise addition
+variable_t* _multiply(variable_t* left_variable, variable_t* right_variable, uint8_t use_grad){
     tensor_t* new_tensor = _tensor_multiply(left_variable->tensor, right_variable->tensor);
-    return _new_variable_from_tensor(new_tensor);
+    variable_t* new_variable = _new_variable_from_tensor(new_tensor);
+    if(use_grad){
+        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_multiply_grad, &_multiply_grad);
+    } 
+    return new_variable;
 }
 
