@@ -28,10 +28,10 @@ typedef tensor_entry_t (* const tensor_entry_unary_fn_t)(tensor_entry_t entry);
 // binary op: index: tensor_size_t -> entry: tensor_entry_t, used to populate a tensor
 typedef tensor_entry_t (* const tensor_index_fn_t)(tensor_size_t index);
 
-tensor_t* _new_tensor(uint8_t num_dims, tensor_size_t* dims);
-tensor_t* _new_tensor_like(tensor_t* old_tensor);
-tensor_t* _new_tensor_zeros_like(tensor_t* old_tensor);
-tensor_t* _copy_tensor(tensor_t* old_tensor);
+tensor_t* _new_tensor(uint8_t num_dims, const tensor_size_t* dims);
+tensor_t* _new_tensor_like(const tensor_t* old_tensor);
+tensor_t* _new_tensor_zeros_like(const tensor_t* old_tensor);
+tensor_t* _copy_tensor(const tensor_t* old_tensor);
 
 void _tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value);
 void _tensor_multiply_by_scalar_value(tensor_t* tensor, tensor_entry_t value);
@@ -44,12 +44,12 @@ void _tensor_set_to_entry_fn_value(tensor_t* tensor, tensor_entry_unary_fn_t ent
  * NOTE: in .h so they'll be inlined
 */
 
-static inline tensor_entry_t _tensor_get_entry(tensor_t* tensor, tensor_size_t index){
+static inline tensor_entry_t _tensor_get_entry(const tensor_t* tensor, tensor_size_t index){
     // DEBUG_ASSERT(!TENSOR_IN_BOUNDS_INDEX(tensor, index), "Out of bounds!\n");
     return tensor->data[index];
 }
 
-static inline void _tensor_set_entry(tensor_t *tensor, tensor_size_t index, tensor_entry_t value){
+static inline void _tensor_set_entry(const tensor_t* tensor, tensor_size_t index, tensor_entry_t value){
     // DEBUG_ASSERT(!TENSOR_IN_BOUNDS_INDEX(tensor, index), "Out of bounds!\n");
     tensor->data[index] = value;
 }
@@ -60,9 +60,9 @@ void _tensor_set_to_fn_value(tensor_t* tensor, tensor_index_fn_t index_fn);
 
 void _display_tensor(tensor_t* tensor);
 
-tensor_t* _tensor_add(tensor_t* left_tensor, tensor_t* right_tensor);
-tensor_t* _tensor_subtract(tensor_t* left_tensor, tensor_t* right_tensor);
-tensor_t* _tensor_multiply(tensor_t* left_tensor, tensor_t* right_tensor);
+tensor_t* _tensor_add(const tensor_t* left_tensor, const tensor_t* right_tensor);
+tensor_t* _tensor_subtract(const tensor_t* left_tensor, const tensor_t* right_tensor);
+tensor_t* _tensor_multiply(const tensor_t* left_tensor, const tensor_t* right_tensor);
 
 
 #endif // TENSOR_H

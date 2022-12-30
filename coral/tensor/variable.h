@@ -12,17 +12,17 @@ typedef struct {
     grad_meta_t* grad_meta;
 } variable_t;
 
-variable_t* _new_variable_from_tensor(tensor_t* tensor);
+variable_t* _new_variable_from_tensor(const tensor_t* tensor);
 variable_t* new_variable(int num_dims, ...);
-variable_t* new_variable_like(variable_t* old_variable);
-variable_t* copy_variable(variable_t* old_variable);
+variable_t* new_variable_like(const variable_t* old_variable);
+variable_t* copy_variable(const variable_t* old_variable);
 
 void set_to_scalar(variable_t* variable, tensor_entry_t value);
 
-typedef variable_t* (* const variable_binary_op_t)(variable_t* left_entry, variable_t* right_entry);
-typedef variable_t* (* const variable_unary_op_t)(variable_t* left_entry, variable_t* right_entry);
-typedef tensor_t* (* const variable_binary_grad_op_t)(variable_t* left_entry, variable_t* right_entry, variable_t* child);
-typedef tensor_t* (* const variable_unary_grad_op_t)(variable_t* entry, variable_t* child);
+typedef variable_t* (* const variable_binary_op_t)(const variable_t* left_variable, const variable_t* right_variable);
+typedef variable_t* (* const variable_unary_op_t)(const variable_t* left_variable, const variable_t* right_variable);
+typedef tensor_t* (* const variable_binary_grad_op_t)(const variable_t* arg, const variable_t* other_arg, const variable_t* result);
+typedef tensor_t* (* const variable_unary_grad_op_t)(const variable_t* arg, const variable_t* result);
 typedef void (* generic_op_t)();
 
 #define variable_grad_op_t generic_op_t
@@ -45,17 +45,17 @@ typedef struct {
     diff_arg_t* args[2];
 } grad_meta_t;
 
-variable_t* add(variable_t* left_variable, variable_t* right_variable);
-variable_t* subtract(variable_t* left_variable, variable_t* right_variable);
-variable_t* multiply(variable_t* left_variable, variable_t* right_variable);
-variable_t* _add(variable_t* left_variable, variable_t* right_variable, uint8_t use_grad);
-variable_t* _subtract(variable_t* left_variable, variable_t* right_variable, uint8_t use_grad);
-variable_t* _multiply(variable_t* left_variable, variable_t* right_variable, uint8_t use_grad);
+variable_t* add(const variable_t* left_variable, const variable_t* right_variable);
+variable_t* subtract(const variable_t* left_variable, const variable_t* right_variable);
+variable_t* multiply(const variable_t* left_variable, const variable_t* right_variable);
+variable_t* _add(const variable_t* left_variable, const variable_t* right_variable, uint8_t use_grad);
+variable_t* _subtract(const variable_t* left_variable, const variable_t* right_variable, uint8_t use_grad);
+variable_t* _multiply(const variable_t* left_variable, const variable_t* right_variable, uint8_t use_grad);
 
-void display_variable(variable_t* variable);
-void display_variable_with_gradient(variable_t* variable);
+void display_variable(const variable_t* variable);
+void display_variable_with_gradient(const variable_t* variable);
 
-static inline tensor_entry_t get_entry(variable_t* variable, tensor_size_t index){
+static inline tensor_entry_t get_entry(const variable_t* variable, tensor_size_t index){
     return _tensor_get_entry(variable->tensor, index);
 }
 

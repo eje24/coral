@@ -15,17 +15,17 @@ static inline tensor_size_t _get_size_from_dims(uint8_t num_dims, tensor_size_t*
     return size;
 }
 
-static inline tensor_size_t _tensor_get_size(tensor_t* tensor){
+static inline tensor_size_t _tensor_get_size(const tensor_t* tensor){
     return _get_size_from_dims(tensor->num_dims, tensor->dims);
 }
 
-static inline size_t _tensor_get_size_in_bytes(tensor_t* tensor){
+static inline size_t _tensor_get_size_in_bytes(const tensor_t* tensor){
     return _tensor_get_size(tensor) * sizeof(tensor_entry_t);
 }
 
 // create new tensor
 // entries are set to zero by default
-tensor_t* _new_tensor(uint8_t num_dims, tensor_size_t* dims){
+tensor_t* _new_tensor(uint8_t num_dims, const tensor_size_t* dims){
     tensor_size_t tensor_size = _get_size_from_dims(num_dims, dims);
     tensor_entry_t* data = (tensor_entry_t*) calloc(tensor_size, sizeof(tensor_entry_t));
     tensor_t* new_tensor = (tensor_t*) malloc(sizeof(tensor_t));
@@ -38,17 +38,17 @@ tensor_t* _new_tensor(uint8_t num_dims, tensor_size_t* dims){
 }
 
 // TODO - ensure this is inlined
-tensor_t* _new_tensor_like(tensor_t* old_tensor){
+tensor_t* _new_tensor_like(const tensor_t* old_tensor){
     return _new_tensor(old_tensor->num_dims, old_tensor->dims);
 }
 
 // the same as _new_tensor_like (for now)
-tensor_t* _new_tensor_zeros_like(tensor_t* old_tensor){
+tensor_t* _new_tensor_zeros_like(const tensor_t* old_tensor){
     return _new_tensor(old_tensor->num_dims, old_tensor->dims);
 }
 
 
-tensor_t* _copy_tensor(tensor_t* old_tensor){
+tensor_t* _copy_tensor(const tensor_t* old_tensor){
     tensor_t* new_tensor = _new_tensor_like(old_tensor);
     memcpy(new_tensor->data, old_tensor->data, _tensor_get_size_in_bytes(old_tensor));
     return new_tensor;
