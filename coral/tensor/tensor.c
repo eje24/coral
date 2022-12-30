@@ -236,14 +236,14 @@ static inline tensor_t* _tensor_broadcast_scalar_fn(tensor_t* left_tensor, tenso
 // return new tensor which is the result of component-wise addition 
 // of left_tensor and right_tensor
 // assumes that left_tensor and right_tensor are compatible
-tensor_t* _tensor_add(tensor_t* left_tensor, tensor_t* right_tensor){
+tensor_t* _tensor_add(const tensor_t* left_tensor, const tensor_t* right_tensor){
     return _tensor_broadcast_scalar_fn(left_tensor, right_tensor, &_scalar_add);
 }
 
-tensor_t* _tensor_subtract(tensor_t* left_tensor, tensor_t* right_tensor){
+tensor_t* _tensor_subtract(const tensor_t* left_tensor, const tensor_t* right_tensor){
     return _tensor_broadcast_scalar_fn(left_tensor, right_tensor, &_scalar_subtract);
 }
 
-tensor_t* _tensor_multiply(tensor_t* left_tensor, tensor_t* right_tensor){
+tensor_t* _tensor_multiply(const tensor_t* left_tensor, const tensor_t* right_tensor){
     return _tensor_broadcast_scalar_fn(left_tensor, right_tensor, &_scalar_multiply);
 }
