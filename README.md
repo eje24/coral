@@ -14,6 +14,8 @@ TODO:
     - 🏗️ enable link-time optimization (quick)
     - extend tensor index/entry value lambda broadcasts to variable
     - 🏗️ add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns)
+    - 🏗️ reference count and "garbage collect" old tensors
+    - 🏗️ introduce a notion of "tensor dims" (maybe as a struct like tensor_dims_t) so tensors can be initialized by 
     - ℹ️: for now, grad_ops return tensors, not variables, as we do not care about higher order derivatives (i.e. treating gradients as variables in their own right)
     - ✅ make everything heap-allocated
     - ✅ variadic update (tensors should be able to be initialized up to 3 dimensions) - DONE
@@ -36,6 +38,7 @@ NOTES:
     - `_tensor_multiply_by_scalar` will create a new tensor (use const for argument types)
     - `_tensor_multiply_existing_by_scalar` will mutate an existing tensor (void return)
     - see https://softwareengineering.stackexchange.com/questions/422786/naming-convention-for-functions-that-mutate-arguments-vs-creating-a-new-object
+- TODO: standardize naming (child vs parent?? left/right variable/entry/arg??)
 
 AUTOGRAD:
 - grad_node_t

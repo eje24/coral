@@ -1,5 +1,6 @@
 #include "variable.h"
 #include "tensor.h"
+#include "grad.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -12,6 +13,7 @@ variable_t* _new_variable_from_tensor(const tensor_t* tensor){
     variable_t* new_variable = (variable_t *) malloc(sizeof(variable_t));
     new_variable->tensor = tensor;
     new_variable->gradient = _new_tensor_zeros_like(tensor);
+    new_variable->grad_meta = _default_grad_meta();
     return new_variable;
 }
 
@@ -63,24 +65,6 @@ void set_to_scalar(variable_t* variable, tensor_entry_t value){
 /**
  * FUNCTIONS
 */
-
-void _unary_set_grad_meta(variable_t* child, variable_t* parent, variable_grad_op_t grad_op){
-    diff_arg_t* diff_arg = _new_diff_arg(parent, grad_op);
-    grad_meta_t* new_grad_meta = (grad_meta_t*) malloc(sizeof(grad_meta_t));
-    new_grad_meta->num_args = 1;
-    new_grad_meta->args[0] = diff_arg;
-    child->grad_meta = new_grad_meta;
-}
-
-void _binary_set_grad_meta(variable_t* child, variable_t* parent1, variable_t* parent2, variable_binary_grad_op_t grad_op1, variable_binary_grad_op_t grad_op2){
-    diff_arg_t* diff_arg1 = _new_diff_arg(parent1, grad_op1);
-    diff_arg_t* diff_arg2 = _new_diff_arg(parent2, grad_op2);
-    grad_meta_t* new_grad_meta = (grad_meta_t*) malloc(sizeof(grad_meta_t));
-    new_grad_meta->num_args = 2;
-    new_grad_meta->args[0] = diff_arg1;
-    new_grad_meta->args[1] = diff_arg2;
-    child->grad_meta = new_grad_meta;
-}
 
 variable_t* add(const variable_t* left_variable, const variable_t* right_variable){
     return _add(left_variable, right_variable, true);

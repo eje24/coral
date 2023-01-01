@@ -55,6 +55,15 @@ tensor_t* _copy_tensor(const tensor_t* old_tensor){
 }
 
 /**
+ * PROPERTIES
+*/
+
+// returns True iff the tensors dimensions are 1
+bool _tensor_is_scalar(tensor_t* tensor){
+    return (tensor->num_dims == 1) && (tensor->dims[0] == 1);
+}
+
+/**
  * NON-INLINED SETTERS/MUTATORS
 */
 
@@ -154,10 +163,6 @@ void _display_tensor(tensor_t* tensor){
  * VIEWS - TODO
 */
 
-/**
- *  FUNCTIONS
-*/
-
 // returns true if and only if tensor dimensions match exactly
 // used as a pre-check for component-wise operations
 bool _tensor_exact_compatible(tensor_t* left_tensor, tensor_t* right_tensor){
@@ -192,28 +197,25 @@ bool _tensor_broadcast_componentwise_compatible(tensor_t* left_tensor, tensor_t*
 //     return 1;
 // }
 
-static inline tensor_entry_t _scalar_add(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {
+static inline tensor_entry_t _tensor_entry_add(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {
     return left_scalar + right_scalar;
 }
 
-static inline tensor_entry_t _scalar_multiply(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {
+static inline tensor_entry_t _tensor_entry_multiply(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {
     return left_scalar * right_scalar;
 }
 
-static inline tensor_entry_t _scalar_subtract(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {
+static inline tensor_entry_t _tensor_entry_sutract(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {
     return left_scalar - right_scalar;
 }
 
-// TODO : allow for broadcasting of different sizes
-tensor_t* _tensor_broadcast_binary_componentwise_fn(tensor_t* left_tensor, tensor_t* right_tensor, tensor_entry_binary_fn_t tensor_entry_binary_fn){
-    DEBUG_ASSERT(_tensor_broadcast_componentwise_compatible(left_tensor, right_tensor), "Tensors are not broadcast compatible!\n");
-    // ensure that left_tensor->num_dims >= right_tensor->num_dims
-    if(left_tensor->num_dims < right_tensor->num_dims){
-        return _tensor_broadcast_binary_componentwise_fn(right_tensor, left_tensor, tensor_entry_binary_fn);
+void _tensor_in_place_broadcast_fn(tensor_t* dest_tensor, const tensor_t* source_tensor1, const tensor_t* source_tensor2, tensor_entry_binary_fn_t tensor_entry_binary_fn){
+    ASSERT(_tensor_broadcast_componentwise_compatible(source_tensor1, source_tensor2), "Tensors are not broadcast compatible!\n");
+    if(source_tensor1->num_dims < source_tensor2->num_dims){
+        return _tensor_in_place_broadcast_fn(dest_tensor, source_tensor2, source_tensor1, tensor_entry_binary_fn);
     }
-    tensor_t* large_tensor = left_tensor;
-    tensor_t* small_tensor = right_tensor;
-    tensor_t* new_tensor = _new_tensor_like(large_tensor);
+    tensor_t* large_tensor = source_tensor1;
+    tensor_t* small_tensor = source_tensor2;
     uint8_t dim_offset = large_tensor->num_dims - small_tensor->num_dims;
     tensor_size_t num_small = 1;
     for(uint8_t dim_index = 0; dim_index < dim_offset; dim_index++){
@@ -227,23 +229,50 @@ tensor_t* _tensor_broadcast_binary_componentwise_fn(tensor_t* left_tensor, tenso
             tensor_entry_t large_entry = _tensor_get_entry(large_tensor, large_index);
             tensor_entry_t small_entry = _tensor_get_entry(small_tensor, small_inner_index);
             tensor_entry_t new_entry = (*tensor_entry_binary_fn)(large_entry, small_entry);
-            _tensor_set_entry(new_tensor, large_index, new_entry);
+            _tensor_set_entry(dest_tensor, large_index, new_entry);
         }
     }
+}
+
+// TODO : allow for broadcasting of different sizes
+tensor_t* _tensor_broadcast_fn(tensor_t* left_tensor, tensor_t* right_tensor, tensor_entry_binary_fn_t tensor_entry_binary_fn){
+    // ensure that left_tensor->num_dims >= right_tensor->num_dims
+    tensor_t* new_tensor = (left_tensor->num_dims > right_tensor->num_dims) ? _new_tensor_like(left_tensor) : _new_tensor_like(right_tensor);
+    _tensor_in_place_broadcast_fn(new_tensor, left_tensor, right_tensor, tensor_entry_binary_fn);
     return new_tensor;
 }
+
+/**
+ * MUTATING FUNCTIONS
+*/
+
+void _tensor_add_to_existing(tensor_t* left_tensor, const tensor_t* right_tensor){
+    return _tensor_in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &_tensor_entry_add);
+}
+
+void _tensor_subtract_to_existing(tensor_t* left_tensor, const tensor_t* right_tensor){
+    return _tensor_in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &_tensor_entry_sutract);
+}
+
+void _tensor_multiply_to_existing(tensor_t* left_tensor, const tensor_t* right_tensor){
+    return _tensor_in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &_tensor_entry_multiply);
+}
+
+/**
+ *  NON-MUTATING FUNCTIONS
+*/
 
 // return new tensor which is the result of component-wise addition 
 // of left_tensor and right_tensor
 // assumes that left_tensor and right_tensor are compatible
 tensor_t* _tensor_add(const tensor_t* left_tensor, const tensor_t* right_tensor){
-    return _tensor_broadcast_binary_componentwise_fn(left_tensor, right_tensor, &_scalar_add);
+    return _tensor_broadcast_fn(left_tensor, right_tensor, &_tensor_entry_add);
 }
 
 tensor_t* _tensor_subtract(const tensor_t* left_tensor, const tensor_t* right_tensor){
-    return _tensor_broadcast_binary_componentwise_fn(left_tensor, right_tensor, &_scalar_subtract);
+    return _tensor_broadcast_fn(left_tensor, right_tensor, &_tensor_entry_sutract);
 }
 
 tensor_t* _tensor_multiply(const tensor_t* left_tensor, const tensor_t* right_tensor){
-    return _tensor_broadcast_binary_componentwise_fn(left_tensor, right_tensor, &_scalar_multiply);
+    return _tensor_broadcast_fn(left_tensor, right_tensor, &_tensor_entry_multiply);
 }

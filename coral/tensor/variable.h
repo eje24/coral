@@ -17,6 +17,10 @@ variable_t* new_variable(int num_dims, ...);
 variable_t* new_variable_like(const variable_t* old_variable);
 variable_t* copy_variable(const variable_t* old_variable);
 
+static inline bool is_scalar(variable_t* variable){
+    return _tensor_is_scalar(variable->tensor);
+}
+
 void set_to_scalar(variable_t* variable, tensor_entry_t value);
 
 typedef variable_t* (* const variable_binary_op_t)(const variable_t* left_variable, const variable_t* right_variable);
@@ -41,9 +45,17 @@ static inline diff_arg_t* _new_diff_arg(variable_t* arg, variable_grad_op_t grad
 }
 
 typedef struct {
+    int ref_count;
     int num_args; // 0 for leaf
     diff_arg_t* args[2];
 } grad_meta_t;
+
+static inline grad_meta_t* _default_grad_meta(){
+    grad_meta_t* new_grad_meta = (grad_meta_t*) malloc(sizeof(grad_meta_t));
+    new_grad_meta->ref_count = 0;
+    new_grad_meta->num_args = 0;
+    return new_grad_meta;
+}
 
 variable_t* add(const variable_t* left_variable, const variable_t* right_variable);
 variable_t* subtract(const variable_t* left_variable, const variable_t* right_variable);

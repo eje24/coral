@@ -33,6 +33,8 @@ tensor_t* _new_tensor_like(const tensor_t* old_tensor);
 tensor_t* _new_tensor_zeros_like(const tensor_t* old_tensor);
 tensor_t* _copy_tensor(const tensor_t* old_tensor);
 
+bool _tensor_is_scalar(tensor_t* tensor);
+
 void _tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value);
 void _tensor_multiply_by_scalar_value(tensor_t* tensor, tensor_entry_t value);
 void _tensor_multiply_existing(tensor_t* multiplicand, tensor_t* multiplier);
@@ -59,6 +61,10 @@ void _tensor_set_to_fn_value(tensor_t* tensor, tensor_index_fn_t index_fn);
 
 
 void _display_tensor(tensor_t* tensor);
+
+void _tensor_add_to_existing(tensor_t* left_tensor, const tensor_t* right_tensor);
+void _tensor_subtract_to_existing(tensor_t* left_tensor, const tensor_t* right_tensor);
+void _tensor_multiply_to_existing(tensor_t* left_tensor, const tensor_t* right_tensor);
 
 tensor_t* _tensor_add(const tensor_t* left_tensor, const tensor_t* right_tensor);
 tensor_t* _tensor_subtract(const tensor_t* left_tensor, const tensor_t* right_tensor);
