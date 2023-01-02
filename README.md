@@ -1,6 +1,6 @@
 # coral
 
-A PyTorch-inspired deep learning framework in C.
+A simple PyTorch-inspired deep learning framework in C.
 
 TODO:
 - misc
