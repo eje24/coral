@@ -90,7 +90,7 @@ void _tensor_multiply_existing(tensor_t* multiplicand, tensor_t* multiplier){
     }
 }
 
-void _tensor_set_to_index_fn_value(tensor_t* tensor, tensor_index_fn_t index_fn){
+void _tensor_in_place_apply_index_fn(tensor_t* tensor, tensor_index_fn_t index_fn){
     tensor_size_t tensor_size = _tensor_get_size(tensor);
     for(tensor_size_t index = 0; index < tensor_size; index++){
         tensor_entry_t entry_value = (*index_fn)(index);
@@ -98,7 +98,7 @@ void _tensor_set_to_index_fn_value(tensor_t* tensor, tensor_index_fn_t index_fn)
     }
 }
 
-void _tensor_set_to_entry_fn_value(tensor_t* tensor, tensor_entry_unary_fn_t entry_fn){
+void _tensor_in_place_apply_entry_fn(tensor_t* tensor, tensor_entry_unary_fn_t entry_fn){
     tensor_size_t tensor_size = _tensor_get_size(tensor);
     for(tensor_size_t index = 0; index < tensor_size; index++){
         tensor_entry_t entry_old_value = _tensor_get_entry(tensor, index);
@@ -106,6 +106,20 @@ void _tensor_set_to_entry_fn_value(tensor_t* tensor, tensor_entry_unary_fn_t ent
         _tensor_set_entry(tensor, index, entry_new_value);
     }
 }
+
+static inline tensor_t* _tensor_apply_index_fn(tensor_t* tensor, tensor_entry_unary_fn_t index_fn){
+    tensor_t* new_tensor = _copy_tensor(tensor);
+    _tensor_in_place_apply_index_fn(new_tensor, index_fn);
+    return new_tensor;
+}
+
+static inline tensor_t* _tensor_apply_entry_fn(tensor_t* tensor, tensor_entry_unary_fn_t entry_fn){
+    tensor_t* new_tensor = _copy_tensor(tensor);
+    _tensor_in_place_apply_entry_fn(new_tensor, entry_fn);
+    return new_tensor;
+}
+
+
 
 
 /**
@@ -192,21 +206,29 @@ bool _tensor_broadcast_componentwise_compatible(tensor_t* left_tensor, tensor_t*
     return 1;
 }
 
-// TODO
-// bool _tensor_broadcast_matmul_compatible(tensor_t* left_tensor, tensor_t* right_tensor){
-//     return 1;
-// }
+/**
+ * tensor_entry_t x tensor_entry_t -> tensor_entry_t
+ * tensor_entry_t -> tensor_entry_t
+*/
 
-static inline tensor_entry_t _tensor_entry_add(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {
-    return left_scalar + right_scalar;
+static inline tensor_entry_t _tensor_entry_add(tensor_entry_t left_entry, tensor_entry_t right_entry) {
+    return left_entry + right_entry;
 }
 
-static inline tensor_entry_t _tensor_entry_multiply(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {
-    return left_scalar * right_scalar;
+static inline tensor_entry_t _tensor_entry_multiply(tensor_entry_t left_entry, tensor_entry_t right_entry) {
+    return left_entry * right_entry;
 }
 
-static inline tensor_entry_t _tensor_entry_sutract(tensor_entry_t left_scalar, tensor_entry_t right_scalar) {
-    return left_scalar - right_scalar;
+static inline tensor_entry_t _tensor_entry_subtract(tensor_entry_t left_entry, tensor_entry_t right_entry) {
+    return left_entry - right_entry;
+}
+
+static inline tensor_entry_t _tensor_entry_abs_grad(tensor_entry_t entry){
+    return entry >= 0 ? 1 : -1;
+}
+
+static inline tensor_entry_t _tensor_entry_abs(tensor_entry_t entry){
+    return entry >= 0 ? entry : -entry;
 }
 
 void _tensor_in_place_broadcast_fn(tensor_t* dest_tensor, const tensor_t* source_tensor1, const tensor_t* source_tensor2, tensor_entry_binary_fn_t tensor_entry_binary_fn){
@@ -247,15 +269,15 @@ tensor_t* _tensor_broadcast_fn(tensor_t* left_tensor, tensor_t* right_tensor, te
 */
 
 void _tensor_add_to_existing(tensor_t* left_tensor, const tensor_t* right_tensor){
-    return _tensor_in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &_tensor_entry_add);
+    _tensor_in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &_tensor_entry_add);
 }
 
 void _tensor_subtract_to_existing(tensor_t* left_tensor, const tensor_t* right_tensor){
-    return _tensor_in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &_tensor_entry_sutract);
+    _tensor_in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &_tensor_entry_subtract);
 }
 
 void _tensor_multiply_to_existing(tensor_t* left_tensor, const tensor_t* right_tensor){
-    return _tensor_in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &_tensor_entry_multiply);
+    _tensor_in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &_tensor_entry_multiply);
 }
 
 /**
@@ -270,9 +292,21 @@ tensor_t* _tensor_add(const tensor_t* left_tensor, const tensor_t* right_tensor)
 }
 
 tensor_t* _tensor_subtract(const tensor_t* left_tensor, const tensor_t* right_tensor){
-    return _tensor_broadcast_fn(left_tensor, right_tensor, &_tensor_entry_sutract);
+    return _tensor_broadcast_fn(left_tensor, right_tensor, &_tensor_entry_subtract);
 }
 
 tensor_t* _tensor_multiply(const tensor_t* left_tensor, const tensor_t* right_tensor){
     return _tensor_broadcast_fn(left_tensor, right_tensor, &_tensor_entry_multiply);
+}
+
+tensor_t* _tensor_abs_grad(const tensor_t* tensor){
+    tensor_t* new_tensor = _copy_tensor(tensor);
+    _tensor_in_place_apply_entry_fn(new_tensor, &_tensor_entry_abs_grad);
+    return new_tensor;
+}
+
+tensor_t* _tensor_abs(const tensor_t* tensor){
+    tensor_t* new_tensor = _copy_tensor(tensor);
+    _tensor_in_place_apply_entry_fn(new_tensor, &_tensor_entry_abs);
+    return new_tensor;
 }

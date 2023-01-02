@@ -60,9 +60,9 @@ static inline grad_meta_t* _default_grad_meta(){
 variable_t* add(const variable_t* left_variable, const variable_t* right_variable);
 variable_t* subtract(const variable_t* left_variable, const variable_t* right_variable);
 variable_t* multiply(const variable_t* left_variable, const variable_t* right_variable);
-variable_t* _add(const variable_t* left_variable, const variable_t* right_variable, uint8_t use_grad);
-variable_t* _subtract(const variable_t* left_variable, const variable_t* right_variable, uint8_t use_grad);
-variable_t* _multiply(const variable_t* left_variable, const variable_t* right_variable, uint8_t use_grad);
+variable_t* _add(const variable_t* left_variable, const variable_t* right_variable, bool use_grad);
+variable_t* _subtract(const variable_t* left_variable, const variable_t* right_variable, bool use_grad);
+variable_t* _multiply(const variable_t* left_variable, const variable_t* right_variable, bool use_grad);
 
 void display_variable(const variable_t* variable);
 void display_variable_with_gradient(const variable_t* variable);

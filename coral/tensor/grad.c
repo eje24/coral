@@ -1,10 +1,9 @@
 #include "grad.h"
 #include "variable.h"
-#include "debug.h"
+#include "assert.h"
 
-// recursively traverse the computation graph backwards
-// updating the gradients as we go
-
+// propogate gradient update from result into arg
+// here, result = fn(arg)
 void _update_unary_grad(diff_arg_t* arg, variable_t* result){
     variable_unary_grad_op_t gradient_fn = (variable_unary_grad_op_t) (arg->grad_op);
     tensor_t* gradient_update = (*gradient_fn)(arg->arg, result);
@@ -12,6 +11,8 @@ void _update_unary_grad(diff_arg_t* arg, variable_t* result){
     _decrement_ref_count(arg->arg);
 }
 
+// propogate gradient update from result into arg
+// here, result = fn(arg, other_arg)
 void _update_binary_grad(diff_arg_t* arg, diff_arg_t* other_arg, variable_t* result){
     variable_binary_grad_op_t gradient_fn = (variable_binary_grad_op_t) (arg->grad_op);
     tensor_t* gradient_update = (*gradient_fn)(arg->arg, other_arg->arg, result);
@@ -56,6 +57,7 @@ void backwards(variable_t* root){
     _backwards(root);
 }
 
+
 void _unary_set_grad_meta(variable_t* child, variable_t* parent, variable_grad_op_t grad_op){
     diff_arg_t* diff_arg = _new_diff_arg(parent, grad_op);
     grad_meta_t* new_grad_meta = (grad_meta_t*) malloc(sizeof(grad_meta_t));
@@ -65,6 +67,7 @@ void _unary_set_grad_meta(variable_t* child, variable_t* parent, variable_grad_o
     child->grad_meta = new_grad_meta;
     _increment_ref_count(parent);
 }
+
 
 void _binary_set_grad_meta(variable_t* child, variable_t* parent1, variable_t* parent2, variable_binary_grad_op_t grad_op1, variable_binary_grad_op_t grad_op2){
     diff_arg_t* diff_arg1 = _new_diff_arg(parent1, grad_op1);

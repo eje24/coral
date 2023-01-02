@@ -63,7 +63,7 @@ void set_to_scalar(variable_t* variable, tensor_entry_t value){
 }
 
 /**
- * FUNCTIONS
+ * EXTERNAL FUNCTIONS
 */
 
 variable_t* add(const variable_t* left_variable, const variable_t* right_variable){
@@ -81,24 +81,22 @@ variable_t* multiply(const variable_t* left_variable, const variable_t* right_va
 /**
  * GRADIENTS: return grad with respect to arg, possible as a function of both arg and other_arg
 */
-tensor_t* _add_grad(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
+
+
+/**
+ * INTERNAL ATOMIC FUNCTIONS
+ * 
+ * these functios explicitly update the gradient graph
+ * other functios which are compositions of these atomic functions
+ * rely on these functions to update the computation graph
+*/
+
+static inline tensor_t* _add_grad(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
     return _copy_tensor(child->gradient);
 }
 
-tensor_t* _subtract_grad(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
-    tensor_t* child_grad = _copy_tensor(child->gradient);
-    _tensor_multiply_by_scalar_value(child_grad, -1);
-    return child_grad;
-}
-
-tensor_t* _multiply_grad(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
-    tensor_t* arg_grad = _copy_tensor(child->gradient);
-    _tensor_multiply_existing(arg_grad, other_arg->tensor);
-    return arg_grad;
-}
-
 // performs component-wise addition
-variable_t* _add(const variable_t* left_variable, const variable_t* right_variable, uint8_t use_grad){
+variable_t* _add(const variable_t* left_variable, const variable_t* right_variable, bool use_grad){
     tensor_t* new_tensor = _tensor_add(left_variable->tensor, right_variable->tensor);
     variable_t* new_variable = _new_variable_from_tensor(new_tensor);
     if(use_grad){
@@ -107,8 +105,14 @@ variable_t* _add(const variable_t* left_variable, const variable_t* right_variab
     return new_variable;
 }
 
+tensor_t* _subtract_grad(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
+    tensor_t* child_grad = _copy_tensor(child->gradient);
+    _tensor_multiply_by_scalar_value(child_grad, -1);
+    return child_grad;
+}
+
 // performs component-wise addition
-variable_t* _subtract(const variable_t* left_variable, const variable_t* right_variable, uint8_t use_grad){
+variable_t* _subtract(const variable_t* left_variable, const variable_t* right_variable, bool use_grad){
     tensor_t* new_tensor = _tensor_subtract(left_variable->tensor, right_variable->tensor);
     variable_t* new_variable = _new_variable_from_tensor(new_tensor);
     if(use_grad){
@@ -117,8 +121,14 @@ variable_t* _subtract(const variable_t* left_variable, const variable_t* right_v
     return new_variable;
 }
 
-// performs component-wise addition
-variable_t* _multiply(const variable_t* left_variable, const variable_t* right_variable, uint8_t use_grad){
+tensor_t* _multiply_grad(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
+    tensor_t* arg_grad = _copy_tensor(child->gradient);
+    _tensor_multiply_existing(arg_grad, other_arg->tensor);
+    return arg_grad;
+}
+
+// returns a new variable whose value is given by the sum of left_variable and right_variable
+variable_t* _multiply(const variable_t* left_variable, const variable_t* right_variable, bool use_grad){
     tensor_t* new_tensor = _tensor_multiply(left_variable->tensor, right_variable->tensor);
     variable_t* new_variable = _new_variable_from_tensor(new_tensor);
     if(use_grad){
@@ -127,3 +137,24 @@ variable_t* _multiply(const variable_t* left_variable, const variable_t* right_v
     return new_variable;
 }
 
+tensor_t* _abs_grad(const variable_t* arg, const variable_t* child){
+    return _tensor_abs_grad(arg);
+}
+
+// returns a new variable whose value is given by the absolute value of variable
+variable_t* _abs(const variable_t* variable, bool use_grad){
+    tensor_t* new_tensor = _tensor_abs(variable->tensor);
+    variable_t* new_variable =  _new_variable_from_tensor(new_tensor);
+    if(use_grad){
+        _unary_set_grad_meta(new_variable, variable, &_abs_grad);
+    }
+    return new_variable;
+}
+
+/**
+ * LOSS FUNCTIONS
+*/
+
+variable_t* l1_loss();
+
+variable_t* l2_loss();

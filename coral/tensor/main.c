@@ -1,6 +1,6 @@
 #include "tensor.h"
 #include "variable.h"
-#include "debug.h"
+#include "assert.h"
 #include <stdio.h>
 
 int main() {

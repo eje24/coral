@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "debug.h"
+#include "assert.h"
 
 typedef float tensor_entry_t; 
 typedef uint64_t tensor_size_t;
@@ -69,6 +69,6 @@ void _tensor_multiply_to_existing(tensor_t* left_tensor, const tensor_t* right_t
 tensor_t* _tensor_add(const tensor_t* left_tensor, const tensor_t* right_tensor);
 tensor_t* _tensor_subtract(const tensor_t* left_tensor, const tensor_t* right_tensor);
 tensor_t* _tensor_multiply(const tensor_t* left_tensor, const tensor_t* right_tensor);
-
+tensor_t* _tensor_abs(const tensor_t* tensor);
 
 #endif // TENSOR_H
