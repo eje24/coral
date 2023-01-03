@@ -47,12 +47,20 @@ tensor_t* _new_tensor_zeros_like(const tensor_t* old_tensor){
     return _new_tensor(old_tensor->num_dims, old_tensor->dims);
 }
 
+tensor_t* _new_tensor_from_entry(tensor_entry_t entry){
+    tensor_size_t dims = 1;
+    tensor_t* new_tensor = _new_tensor(1, &dims);
+    _tensor_set_entry(new_tensor, 0, entry);
+    return new_tensor;
+}
+
 
 tensor_t* _copy_tensor(const tensor_t* old_tensor){
     tensor_t* new_tensor = _new_tensor_like(old_tensor);
     memcpy(new_tensor->data, old_tensor->data, _tensor_get_size_in_bytes(old_tensor));
     return new_tensor;
 }
+
 
 /**
  * PROPERTIES
@@ -192,14 +200,16 @@ bool _tensor_exact_compatible(tensor_t* left_tensor, tensor_t* right_tensor){
 }
 
 // TODO: returns true iff tensors can be broadcasted in the same manner as in numpy/PyTorch
-bool _tensor_broadcast_componentwise_compatible(tensor_t* left_tensor, tensor_t* right_tensor){
+bool _tensor_broadcast_compatible(tensor_t* left_tensor, tensor_t* right_tensor){
     if(left_tensor->num_dims < right_tensor->num_dims){
         return _tensor_broadcast_componentwise_compatible(right_tensor, left_tensor);
     }
     // left_tensor->num_dims >= right_tensor->num_dims
     uint8_t dim_offset = left_tensor->num_dims - right_tensor->num_dims;
     for(uint8_t dim_index = 0; dim_index < right_tensor->num_dims; dim_index++){
-        if(left_tensor->dims[dim_offset + dim_index] != right_tensor->dims[dim_index]){
+        tensor_size_t left_dim = left_tensor->dims[dim_offset + dim_index];
+        tensor_size_t right_dim = right_tensor->dims[dim_index];
+        if(left_dim > 1 && right_dim > 1 && left_dim != right_dim){
             return 0;
         }
     }
@@ -232,7 +242,7 @@ static inline tensor_entry_t _tensor_entry_abs(tensor_entry_t entry){
 }
 
 void _tensor_in_place_broadcast_fn(tensor_t* dest_tensor, const tensor_t* source_tensor1, const tensor_t* source_tensor2, tensor_entry_binary_fn_t tensor_entry_binary_fn){
-    ASSERT(_tensor_broadcast_componentwise_compatible(source_tensor1, source_tensor2), "Tensors are not broadcast compatible!\n");
+    ASSERT(_tensor_broadcast_compatible(source_tensor1, source_tensor2), "Tensors are not broadcast compatible!\n");
     if(source_tensor1->num_dims < source_tensor2->num_dims){
         return _tensor_in_place_broadcast_fn(dest_tensor, source_tensor2, source_tensor1, tensor_entry_binary_fn);
     }
@@ -300,13 +310,28 @@ tensor_t* _tensor_multiply(const tensor_t* left_tensor, const tensor_t* right_te
 }
 
 tensor_t* _tensor_abs_grad(const tensor_t* tensor){
-    tensor_t* new_tensor = _copy_tensor(tensor);
-    _tensor_in_place_apply_entry_fn(new_tensor, &_tensor_entry_abs_grad);
-    return new_tensor;
+    tensor_t* grad_tensor = _copy_tensor(tensor);
+    _tensor_in_place_apply_entry_fn(grad_tensor, &_tensor_entry_abs_grad);
+    return grad_tensor;
 }
 
 tensor_t* _tensor_abs(const tensor_t* tensor){
     tensor_t* new_tensor = _copy_tensor(tensor);
     _tensor_in_place_apply_entry_fn(new_tensor, &_tensor_entry_abs);
     return new_tensor;
+}
+
+tensor_t* _tensor_sum_grad(const tensor_t* tensor){
+    tensor_t* grad_tensor = _new_tensor_like(tensor);
+    _tensor_set_to_scalar_value(grad_tensor, 1);
+    return grad_tensor;
+}
+
+tensor_t* _tensor_sum(const tensor_t* tensor){
+    tensor_size_t tensor_size = _tensor_get_size(tensor);
+    tensor_entry_t sum = 0;
+    for(tensor_size_t index = 0; index < tensor_size; index++){
+        sum += _tensor_get_entry(tensor, index);
+    }
+    return _new_tensor_from_entry(sum);
 }

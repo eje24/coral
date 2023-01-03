@@ -69,6 +69,9 @@ void _tensor_multiply_to_existing(tensor_t* left_tensor, const tensor_t* right_t
 tensor_t* _tensor_add(const tensor_t* left_tensor, const tensor_t* right_tensor);
 tensor_t* _tensor_subtract(const tensor_t* left_tensor, const tensor_t* right_tensor);
 tensor_t* _tensor_multiply(const tensor_t* left_tensor, const tensor_t* right_tensor);
+tensor_t* _tensor_abs_grad(const tensor_t* tensor);
 tensor_t* _tensor_abs(const tensor_t* tensor);
+tensor_t* _tensor_sum_grad(const tensor_t* tensor);
+tensor_t* _tensor_sum(const tensor_t* tensor);
 
 #endif // TENSOR_H

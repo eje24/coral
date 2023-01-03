@@ -6,6 +6,10 @@ TODO:
 - misc
     - ✅ change name (DONE)
 - tensor
+    - ✅ Differentiate between backward_grad function and backward function (backward grad takes into account gradient of result to compute gradient of arguments) 
+        - for now, change `.._grad` functions to `..._grad_backwards` functions
+    - 🏗️ [#0] Extend broadcasting to more lenient numpy broadcasting scheme where dimensions can be 1
+        - need to change broadcast logic in tensor.c
     - 🏗️ [#1] add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns) as well as reductions (sum along dimensions)
     - 🏗️ [#2] add in loss functions (including reductions)
     - 🏗️ [#3] add in matrix multiplications

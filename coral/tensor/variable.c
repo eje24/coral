@@ -78,6 +78,14 @@ variable_t* multiply(const variable_t* left_variable, const variable_t* right_va
     return _multiply(left_variable, right_variable, true);
 }
 
+variable_t* abs(const variable_t* variable){
+    return _abs(variable, true);
+}
+
+variable_t* sum(const variable_t* variable){
+    return _sum(variable, true);
+}
+
 /**
  * GRADIENTS: return grad with respect to arg, possible as a function of both arg and other_arg
 */
@@ -91,7 +99,7 @@ variable_t* multiply(const variable_t* left_variable, const variable_t* right_va
  * rely on these functions to update the computation graph
 */
 
-static inline tensor_t* _add_grad(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
+static inline tensor_t* _add_grad_backward(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
     return _copy_tensor(child->gradient);
 }
 
@@ -100,12 +108,12 @@ variable_t* _add(const variable_t* left_variable, const variable_t* right_variab
     tensor_t* new_tensor = _tensor_add(left_variable->tensor, right_variable->tensor);
     variable_t* new_variable = _new_variable_from_tensor(new_tensor);
     if(use_grad){
-        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_add_grad, &_add_grad);
+        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_add_grad_backward, &_add_grad_backward);
     } 
     return new_variable;
 }
 
-tensor_t* _subtract_grad(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
+tensor_t* _subtract_grad_backward(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
     tensor_t* child_grad = _copy_tensor(child->gradient);
     _tensor_multiply_by_scalar_value(child_grad, -1);
     return child_grad;
@@ -116,12 +124,12 @@ variable_t* _subtract(const variable_t* left_variable, const variable_t* right_v
     tensor_t* new_tensor = _tensor_subtract(left_variable->tensor, right_variable->tensor);
     variable_t* new_variable = _new_variable_from_tensor(new_tensor);
     if(use_grad){
-        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_subtract_grad, &_subtract_grad);
+        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_subtract_grad_backward, &_subtract_grad_backward);
     } 
     return new_variable;
 }
 
-tensor_t* _multiply_grad(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
+tensor_t* _multiply_grad_backward(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
     tensor_t* arg_grad = _copy_tensor(child->gradient);
     _tensor_multiply_existing(arg_grad, other_arg->tensor);
     return arg_grad;
@@ -132,13 +140,13 @@ variable_t* _multiply(const variable_t* left_variable, const variable_t* right_v
     tensor_t* new_tensor = _tensor_multiply(left_variable->tensor, right_variable->tensor);
     variable_t* new_variable = _new_variable_from_tensor(new_tensor);
     if(use_grad){
-        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_multiply_grad, &_multiply_grad);
+        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_multiply_grad_backwards, &_multiply_grad_backwards);
     } 
     return new_variable;
 }
 
-tensor_t* _abs_grad(const variable_t* arg, const variable_t* child){
-    return _tensor_abs_grad(arg);
+tensor_t* _abs_grad_backward(const variable_t* arg, const variable_t* result){
+    return _tensor_multiply(_tensor_abs_grad(arg->tensor), result->gradient);
 }
 
 // returns a new variable whose value is given by the absolute value of variable
@@ -146,7 +154,21 @@ variable_t* _abs(const variable_t* variable, bool use_grad){
     tensor_t* new_tensor = _tensor_abs(variable->tensor);
     variable_t* new_variable =  _new_variable_from_tensor(new_tensor);
     if(use_grad){
-        _unary_set_grad_meta(new_variable, variable, &_abs_grad);
+        _unary_set_grad_meta(new_variable, variable, &_abs_grad_backward);
+    }
+    return new_variable;
+}
+
+tensor_t* _sum_grad_backwards(const variable_t* arg, const variable_t* result){
+    return _tensor_multiply(_tensor_sum_grad(arg->tensor), result->tensor);
+
+}
+
+variable_t* _sum(const variable_t* variable, bool use_grad){
+    tensor_t* new_tensor = _tensor_sum(variable->tensor);
+    variable_t* new_variable = _new_variable_from_tensor(new_tensor);
+    if(use_grad){
+        _unary_set_grad_meta(new_variable, variable, &_sum_grad_backwards);
     }
     return new_variable;
 }
