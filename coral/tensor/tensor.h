@@ -4,31 +4,30 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "assert.h"
+#include "shape.h"
 
 typedef float tensor_entry_t; 
-typedef uint64_t tensor_size_t;
 
 #define TENSOR_MAX_DIMS 3
 
 typedef struct {
-    tensor_entry_t* data;
-    uint8_t num_dims;
-    tensor_size_t dims[TENSOR_MAX_DIMS];
+    tensor_entry_t* data; // ptr to data
+    shape_t* shape; //dimensions of data
 } tensor_t;
 
 // macros for debugging
-// note that lower bound check is currently redundant as tensor_size_t is uint64_t
-#define TENSOR_IN_BOUNDS_ROW_COLUMN(tensor, row, column) (0 <= (row) && (row) <= tensor->num_rows && 0 <= (column) && (column) <= tensor->num_columns)
+// note that lower bound check is currently redundant as size_t is uint64_t
+#define TENSOR_NUM_DIMS(tensor) (tensor)->shape->num_dims
 #define TENSOR_IN_BOUNDS_INDEX(tensor, index) (0 <= (index) && (index) < tensor->num_rows * tensor->num_columns)
 
 // entry x entry -> entry, applied component wise to create a new tensor from two existing ones
 typedef tensor_entry_t (* const tensor_entry_binary_fn_t)(tensor_entry_t left_entry, tensor_entry_t right_entry);
 // entry -> entry, applied component wise to create a new tensor from two existing ones
 typedef tensor_entry_t (* const tensor_entry_unary_fn_t)(tensor_entry_t entry);
-// binary op: index: tensor_size_t -> entry: tensor_entry_t, used to populate a tensor
-typedef tensor_entry_t (* const tensor_index_fn_t)(tensor_size_t index);
+// binary op: index: size_t -> entry: tensor_entry_t, used to populate a tensor
+typedef tensor_entry_t (* const tensor_index_fn_t)(size_t index);
 
-tensor_t* _new_tensor(uint8_t num_dims, const tensor_size_t* dims);
+tensor_t* _new_tensor(shape_t* shape);
 tensor_t* _new_tensor_like(const tensor_t* old_tensor);
 tensor_t* _new_tensor_zeros_like(const tensor_t* old_tensor);
 tensor_t* _copy_tensor(const tensor_t* old_tensor);
@@ -46,12 +45,12 @@ void _tensor_set_to_entry_fn_value(tensor_t* tensor, tensor_entry_unary_fn_t ent
  * NOTE: in .h so they'll be inlined
 */
 
-static inline tensor_entry_t _tensor_get_entry(const tensor_t* tensor, tensor_size_t index){
+static inline tensor_entry_t _tensor_get_entry(const tensor_t* tensor, size_t index){
     // DEBUG_ASSERT(!TENSOR_IN_BOUNDS_INDEX(tensor, index), "Out of bounds!\n");
     return tensor->data[index];
 }
 
-static inline void _tensor_set_entry(const tensor_t* tensor, tensor_size_t index, tensor_entry_t value){
+static inline void _tensor_set_entry(const tensor_t* tensor, size_t index, tensor_entry_t value){
     // DEBUG_ASSERT(!TENSOR_IN_BOUNDS_INDEX(tensor, index), "Out of bounds!\n");
     tensor->data[index] = value;
 }

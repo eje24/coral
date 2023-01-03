@@ -8,8 +8,7 @@ TODO:
 - tensor
     - ✅ Differentiate between backward_grad function and backward function (backward grad takes into account gradient of result to compute gradient of arguments) 
         - for now, change `.._grad` functions to `..._grad_backwards` functions
-    - 🏗️ [#0] Extend broadcasting to more lenient numpy broadcasting scheme where dimensions can be 1
-        - need to change broadcast logic in tensor.c
+    - 🏗️ [#0] Extend broadcasting to more lenient numpy broadcasting scheme where dimensions can be 1 by fixing broadcast logic in tensor.c
     - 🏗️ [#1] add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns) as well as reductions (sum along dimensions)
     - 🏗️ [#2] add in loss functions (including reductions)
     - 🏗️ [#3] add in matrix multiplications
@@ -25,7 +24,7 @@ TODO:
     - extend tensor index/entry value lambda broadcasts to variable
     - 🏗️ add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns)
     - 🏗️ reference count and "garbage collect" old tensors
-    - 🏗️ introduce a notion of "tensor dims" (maybe as a struct like tensor_dims_t) so tensors can be initialized by 
+    - 🏗️ shape_t update (for keeping track of tensor dims)
     - 🏗️ migrate to `_tensor_in_place_...` naming convention for in place tensor operatiosn (and variable operations with `_variable_in_place_...`)
     - ℹ️: for now, grad_ops return tensors, not variables, as we do not care about higher order derivatives (i.e. treating gradients as variables in their own right)
     - ✅ make everything heap-allocated
@@ -50,6 +49,9 @@ NOTES:
     - `_tensor_multiply_existing_by_scalar` will mutate an existing tensor (void return)
     - see https://softwareengineering.stackexchange.com/questions/422786/naming-convention-for-functions-that-mutate-arguments-vs-creating-a-new-object
 - note that reference counting for maintaining topological sort in grad meta is consistent with a variable appearing multiple times in a list of arguments. this is true because `grad_meta_t->ref_count` counts the number of instances in which the variable shows up as an argument, counted by the multiplicity of the argument, rather than just number of graph nodes it's present as an argument in
+- currently, coral only supports up to three dimensional tensors
+    - will possible be extended to arbitrarily many dimensions (performance considerations)
+- too much indirection
 
 AUTOGRAD:
 - grad_node_t
