@@ -52,3 +52,17 @@ bool _shape_broadcast_compatible(shape_t* left_shape, shape_t* right_shape){
     }
     return 1;
 }
+
+// packs the shape to num_dims number of dimensions
+shape_t* _extend_shape_to_dims(const shape_t* shape, int num_dims){
+    ASSERT(shape->num_dims <= num_dims, "Cannot reduce the number of dimensions of a shape.\n");
+    int num_new_dims = num_dims - shape->num_dims;
+    size_t dims[num_dims];
+    for(int index = 0; index < num_new_dims; index++){
+        dims[index] = 1;
+    }
+    for(int index = num_new_dims; index < num_dims; index++){
+        dims[index] = shape->dims[index];
+    }
+    return _new_shape(num_dims, dims);
+}

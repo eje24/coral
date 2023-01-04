@@ -13,7 +13,8 @@ TODO:
     - 🏗️ [#2] add in loss functions (including reductions)
     - 🏗️ [#3] add in matrix multiplications
     - 🏗️ [#4] assert that dimenions are correct/compatible when doing operations
-     - 🏗️ Sphinx documentation
+    - 🏗️ Sphinx documentation
+    - 🏗️ Add "fastpath" for broadcasting when two shapes (or shape-suffixes) are the same
     - 🏗️ functions which do not modify should have const arguments (_tensor_add, _tensor_subtract, etc)
     - 🏗️ update _tensor_broadcast_scalar_fn to two versions (binary and unary) (current implementation is binary)
     - 🏗️ standardize naming (child vs parent?? left/right variable/entry/arg??)
