@@ -8,12 +8,16 @@ TODO:
 - tensor
     - ✅ Differentiate between backward_grad function and backward function (backward grad takes into account gradient of result to compute gradient of arguments) 
         - for now, change `.._grad` functions to `..._grad_backwards` functions
-    - 🏗️ [#0] Extend broadcasting to more lenient numpy broadcasting scheme where dimensions can be 1 by fixing broadcast logic in tensor.c
-    - 🏗️ [#1] add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns) as well as reductions (sum along dimensions)
+    - ✅ [#0] Extend broadcasting to more lenient numpy broadcasting scheme where dimensions can be 1 by fixing broadcast logic in tensor.c
+    - ✅ [#1] add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns) as well as reductions (sum along dimensions)
+    - 🏗️ Switch naming convention so as to remove function names starting with `_` (see naming convention below)
+        - see https://softwareengineering.stackexchange.com/a/115564
+    - 🏗️ find some graceful way of dealing with unused grad parameters 
+        - right now, n-ary functions are assumed to have n-ary gradients, but in many cases the gradient function for a particular variable only involves some subset of the other variables. for example: (d/dx)(x+y) doesn't involve either of x or y. 
     - 🏗️ [#2] add in loss functions (including reductions)
     - 🏗️ [#3] add in matrix multiplications
     - 🏗️ [#4] assert that dimenions are correct/compatible when doing operations
-    - 🏗️ Sphinx documentation
+    - 🏗️ Sphinx documentatio (would be cool)
     - 🏗️ Add "fastpath" for broadcasting when two shapes (or shape-suffixes) are the same
     - 🏗️ functions which do not modify should have const arguments (_tensor_add, _tensor_subtract, etc)
     - 🏗️ update _tensor_broadcast_scalar_fn to two versions (binary and unary) (current implementation is binary)
@@ -23,9 +27,8 @@ TODO:
     - 🏗️ add struct constant_t, and make variable_t an extension
     - 🏗️ enable link-time optimization (quick)
     - extend tensor index/entry value lambda broadcasts to variable
-    - 🏗️ add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns)
     - 🏗️ reference count and "garbage collect" old tensors
-    - 🏗️ shape_t update (for keeping track of tensor dims)
+    - ✅ shape_t update (for keeping track of tensor dims)
     - 🏗️ migrate to `_tensor_in_place_...` naming convention for in place tensor operatiosn (and variable operations with `_variable_in_place_...`)
     - ℹ️: for now, grad_ops return tensors, not variables, as we do not care about higher order derivatives (i.e. treating gradients as variables in their own right)
     - ✅ make everything heap-allocated
@@ -66,4 +69,10 @@ AUTOGRAD:
 
 PERFORMANCE CONSIDERATIONS:
 - most gradient functions won't actually be inlined
+
+OOP Conventions:
+- interface functions always `[MODULE_NAME]_[FUNCTION_NAME]`
+- module-internal (static) functions always `[FUNCTION_NAME]`
+- constructors: `[MODULE_NAME]_specifics`
+    - can no longer have variable called eg `new_tensor`, must be _new_tensor
 

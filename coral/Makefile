@@ -1,6 +1,6 @@
 CC := clang
 TARGET := main
-SRC = main.c variable.c tensor.c
+SRC = main.c variable.c tensor.c grad.c shape.c
 OBJ := $(SRC:.c=.o)
 DEP := $(OBJ:%.o=%.d)
 

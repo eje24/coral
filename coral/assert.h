@@ -1,6 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include <stdio.h>
+
 // Copyright (c) 2022 MIT License by Tao B. Schardl
 #define _DEBUG_ASSERT(PREDICATE, ...)                                    \
   do {                                                                  \

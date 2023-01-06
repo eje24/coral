@@ -2,6 +2,7 @@
 #include "tensor.h"
 #include "grad.h"
 #include "shape.h"
+#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -10,15 +11,15 @@
  * CONSTRUCTORS
 */
 
-variable_t* _new_variable_from_tensor(const tensor_t* tensor){
+variable_t* variable_new_from_tensor(tensor_t* tensor){
     variable_t* new_variable = (variable_t *) malloc(sizeof(variable_t));
     new_variable->tensor = tensor;
-    new_variable->gradient = _new_tensor_zeros_like(tensor);
+    new_variable->gradient = tensor_new_zeros_like(tensor);
     new_variable->grad_meta = _default_grad_meta();
     return new_variable;
 }
 
-variable_t* new_variable(int num_dims, ...){
+variable_t* variable_new(int num_dims, ...){
     // parse dim arguments
     size_t dims[num_dims];
     va_list dim_args;
@@ -27,65 +28,41 @@ variable_t* new_variable(int num_dims, ...){
         dims[dim_index] = va_arg(dim_args, size_t);
     }
     va_end(dim_args);
-    shape_t* shape = _new_shape(num_dims, &dims[0]);
-    tensor_t* new_tensor = _new_tensor(shape);
-    return _new_variable_from_tensor(new_tensor);
+    shape_t* shape = shape_new(num_dims, &dims[0]);
+    tensor_t* new_tensor = tensor_new(shape);
+    return variable_new_from_tensor(new_tensor);
 }
 
 // creates a new variable with tensor of the same dimensions as old_variable
-variable_t* new_variable_like(const variable_t* old_variable){
-    tensor_t* new_tensor = _new_tensor_like(old_variable->tensor);
-    return _new_variable_from_tensor(new_tensor);
+variable_t* variable_new_like(variable_t* old_variable){
+    tensor_t* new_tensor = tensor_new_like(old_variable->tensor);
+    return variable_new_from_tensor(new_tensor);
 }
 
 // creates a new variable by copying the contents of old_variable
-variable_t* copy_variable(const variable_t* old_variable){
-    tensor_t* new_tensor = _copy_tensor(old_variable->tensor);
-    return _new_variable_from_tensor(new_tensor);
+variable_t* variable_copy(variable_t* old_variable){
+    tensor_t* new_tensor = tensor_copy(old_variable->tensor);
+    return variable_new_from_tensor(new_tensor);
 }
 
 /**
  * PRINTING
 */
 
-void display_variable(const variable_t* variable){
+void variable_display(variable_t* variable){
     printf("Tensor:\n");
-    _display_tensor(variable->tensor);
+    tensor_display(variable->tensor);
 }
 
-void display_variable_with_gradient(const variable_t* variable){
+void variable_display_with_gradient(variable_t* variable){
     printf("Tensor:\n");
-    _display_tensor(variable->tensor);
+    tensor_display(variable->tensor);
     printf("Gradient:\n");
-    _display_tensor(variable->gradient);
+    tensor_display(variable->gradient);
 }
 
-void set_to_scalar(variable_t* variable, tensor_entry_t value){
-    _tensor_set_to_scalar_value(variable->tensor, value);
-}
-
-/**
- * EXTERNAL FUNCTIONS
-*/
-
-variable_t* add(const variable_t* left_variable, const variable_t* right_variable){
-    return _add(left_variable, right_variable, true);
-}
-
-variable_t* subtract(const variable_t* left_variable, const variable_t* right_variable){
-    return _subtract(left_variable, right_variable, true);
-}
-
-variable_t* multiply(const variable_t* left_variable, const variable_t* right_variable){
-    return _multiply(left_variable, right_variable, true);
-}
-
-variable_t* abs(const variable_t* variable){
-    return _abs(variable, true);
-}
-
-variable_t* sum(const variable_t* variable){
-    return _sum(variable, true);
+void variable_set_to_scalar(variable_t* variable, tensor_entry_t value){
+    tensor_set_to_scalar_value(variable->tensor, value);
 }
 
 /**
@@ -101,78 +78,105 @@ variable_t* sum(const variable_t* variable){
  * rely on these functions to update the computation graph
 */
 
-static inline tensor_t* _add_grad_backwards(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
-    return _copy_tensor(child->gradient);
+static inline tensor_t* add_grad_backwards(variable_t* arg, variable_t* other_arg, variable_t* child){
+    UNUSED(arg);
+    UNUSED(other_arg);
+    return tensor_copy(child->gradient);
 }
 
 // performs component-wise addition
-variable_t* _add(const variable_t* left_variable, const variable_t* right_variable, bool use_grad){
-    tensor_t* new_tensor = _tensor_add(left_variable->tensor, right_variable->tensor);
-    variable_t* new_variable = _new_variable_from_tensor(new_tensor);
+variable_t* add(variable_t* left_variable, variable_t* right_variable, bool use_grad){
+    tensor_t* new_tensor = tensor_add(left_variable->tensor, right_variable->tensor);
+    variable_t* new_variable = variable_new_from_tensor(new_tensor);
     if(use_grad){
-        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_add_grad_backwards, &_add_grad_backwards);
+        set_binary_grad_meta(new_variable, left_variable, right_variable, &add_grad_backwards, &add_grad_backwards);
     } 
     return new_variable;
 }
 
-tensor_t* _subtract_grad_backwards(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
-    tensor_t* child_grad = _copy_tensor(child->gradient);
-    _tensor_multiply_by_scalar_value(child_grad, -1);
+tensor_t* subtract_grad_backwards(variable_t* arg, variable_t* other_arg, variable_t* child){
+    UNUSED(arg);
+    UNUSED(other_arg);
+    tensor_t* child_grad = tensor_copy(child->gradient);
+    tensor_in_place_multiply_by_scalar_value(child_grad, -1);
     return child_grad;
 }
 
 // performs component-wise addition
-variable_t* _subtract(const variable_t* left_variable, const variable_t* right_variable, bool use_grad){
-    tensor_t* new_tensor = _tensor_subtract(left_variable->tensor, right_variable->tensor);
-    variable_t* new_variable = _new_variable_from_tensor(new_tensor);
+variable_t* subtract(variable_t* left_variable, variable_t* right_variable, bool use_grad){
+    tensor_t* new_tensor = tensor_subtract(left_variable->tensor, right_variable->tensor);
+    variable_t* new_variable = variable_new_from_tensor(new_tensor);
     if(use_grad){
-        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_subtract_grad_backwards, &_subtract_grad_backwards);
+        set_binary_grad_meta(new_variable, left_variable, right_variable, &subtract_grad_backwards, &subtract_grad_backwards);
     } 
     return new_variable;
 }
 
-tensor_t* _multiply_grad_backwards(const variable_t* arg, const variable_t* other_arg, const variable_t* child){
-    tensor_t* arg_grad = _copy_tensor(child->gradient);
-    _tensor_multiply_existing(arg_grad, other_arg->tensor);
-    return arg_grad;
+tensor_t* multiply_grad_backwards(variable_t* arg, variable_t* other_arg, variable_t* child){
+    UNUSED(arg);
+    return tensor_multiply(child->gradient, other_arg->tensor);
 }
 
 // returns a new variable whose value is given by the sum of left_variable and right_variable
-variable_t* _multiply(const variable_t* left_variable, const variable_t* right_variable, bool use_grad){
-    tensor_t* new_tensor = _tensor_multiply(left_variable->tensor, right_variable->tensor);
-    variable_t* new_variable = _new_variable_from_tensor(new_tensor);
+variable_t* multiply(variable_t* left_variable, variable_t* right_variable, bool use_grad){
+    tensor_t* new_tensor = tensor_multiply(left_variable->tensor, right_variable->tensor);
+    variable_t* new_variable = variable_new_from_tensor(new_tensor);
     if(use_grad){
-        _binary_set_grad_meta(new_variable, left_variable, right_variable, &_multiply_grad_backwards, &_multiply_grad_backwards);
+        set_binary_grad_meta(new_variable, left_variable, right_variable, &multiply_grad_backwards, &multiply_grad_backwards);
     } 
     return new_variable;
 }
 
-tensor_t* _abs_grad_backwards(const variable_t* arg, const variable_t* result){
-    return _tensor_multiply(_tensor_abs_grad(arg->tensor), result->gradient);
+tensor_t* abs_value_grad_backwards(variable_t* arg, variable_t* result){
+    return tensor_multiply(tensor_abs(arg->tensor), result->gradient);
 }
 
 // returns a new variable whose value is given by the absolute value of variable
-variable_t* _abs(const variable_t* variable, bool use_grad){
-    tensor_t* new_tensor = _tensor_abs(variable->tensor);
-    variable_t* new_variable =  _new_variable_from_tensor(new_tensor);
+static variable_t* abs_value(variable_t* variable, bool use_grad){
+    tensor_t* new_tensor = tensor_abs(variable->tensor);
+    variable_t* new_variable =  variable_new_from_tensor(new_tensor);
     if(use_grad){
-        _unary_set_grad_meta(new_variable, variable, &_abs_grad_backwards);
+        set_unary_grad_meta(new_variable, variable, &abs_value_grad_backwards);
     }
     return new_variable;
 }
 
-tensor_t* _sum_grad_backwards(const variable_t* arg, const variable_t* result){
-    return _tensor_multiply(_tensor_sum_grad(arg->tensor), result->tensor);
+tensor_t* sum_grad_backwards(variable_t* arg, variable_t* result){
+    return tensor_multiply(tensor_sum_grad(arg->tensor), result->tensor);
 
 }
 
-variable_t* _sum(const variable_t* variable, bool use_grad){
-    tensor_t* new_tensor = _tensor_sum(variable->tensor);
-    variable_t* new_variable = _new_variable_from_tensor(new_tensor);
+variable_t* sum(variable_t* variable, bool use_grad){
+    tensor_t* new_tensor = tensor_sum(variable->tensor);
+    variable_t* new_variable = variable_new_from_tensor(new_tensor);
     if(use_grad){
-        _unary_set_grad_meta(new_variable, variable, &_sum_grad_backwards);
+        set_unary_grad_meta(new_variable, variable, &sum_grad_backwards);
     }
     return new_variable;
+}
+
+/**
+ * EXTERNAL FUNCTIONS
+*/
+
+variable_t* variable_add(variable_t* left_variable, variable_t* right_variable){
+    return add(left_variable, right_variable, true);
+}
+
+variable_t* variable_subtract(variable_t* left_variable, variable_t* right_variable){
+    return subtract(left_variable, right_variable, true);
+}
+
+variable_t* variable_multiply(variable_t* left_variable, variable_t* right_variable){
+    return multiply(left_variable, right_variable, true);
+}
+
+variable_t* variable_abs_value(variable_t* variable){
+    return abs_value(variable, true);
+}
+
+variable_t* variable_sum(variable_t* variable){
+    return sum(variable, true);
 }
 
 /**
@@ -182,3 +186,5 @@ variable_t* _sum(const variable_t* variable, bool use_grad){
 variable_t* l1_loss();
 
 variable_t* l2_loss();
+
+

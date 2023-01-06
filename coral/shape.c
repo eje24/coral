@@ -1,7 +1,8 @@
 #include "shape.h"
 #include "stdbool.h"
+#include "assert.h"
 
-shape_t* _new_shape(int num_dims, size_t* dims){
+shape_t* shape_new(int num_dims, size_t* dims){
     shape_t* new_shape = (shape_t*) malloc(sizeof(shape_t));
     new_shape->dims = (size_t*) malloc(num_dims * sizeof(size_t));
     new_shape->strides = (size_t*) malloc(num_dims * sizeof(size_t));
@@ -17,13 +18,13 @@ shape_t* _new_shape(int num_dims, size_t* dims){
     return new_shape;
 }
 
-shape_t* _copy_shape(const shape_t* shape){
-    return _new_shape(shape->num_dims, shape->dims);
+shape_t* shape_copy(shape_t* shape){
+    return shape_new(shape->num_dims, shape->dims);
 }
 
-shape_t* _get_broadcast_shape(const shape_t* left_shape, const shape_t* right_shape){
+shape_t* shape_get_broadcast_shape(shape_t* left_shape, shape_t* right_shape){
     if(left_shape->num_dims < right_shape->num_dims){
-        return _get_broadcast_shape(right_shape, left_shape);
+        return shape_get_broadcast_shape(right_shape, left_shape);
     }
     int num_dims = left_shape->num_dims;
     size_t dims[num_dims];
@@ -34,12 +35,12 @@ shape_t* _get_broadcast_shape(const shape_t* left_shape, const shape_t* right_sh
     for(int index = offset; index < num_dims; index++){
         dims[index] = MAX(left_shape->dims[index], right_shape->dims[index-offset]);
     }
-    return _new_shape(num_dims, dims);
+    return shape_new(num_dims, dims);
 }
 
-bool _shape_broadcast_compatible(shape_t* left_shape, shape_t* right_shape){
+bool shape_broadcast_compatible(shape_t* left_shape, shape_t* right_shape){
     if(left_shape->num_dims < right_shape->num_dims){
-        return _tensor_broadcast_componentwise_compatible(right_shape, left_shape);
+        return shape_broadcast_compatible(right_shape, left_shape);
     }
     // left_tensor->num_dims >= right_tensor->num_dims
     int dim_offset = left_shape->num_dims - right_shape->num_dims;
@@ -54,8 +55,8 @@ bool _shape_broadcast_compatible(shape_t* left_shape, shape_t* right_shape){
 }
 
 // packs the shape to num_dims number of dimensions
-shape_t* _extend_shape_to_dims(const shape_t* shape, int num_dims){
-    ASSERT(shape->num_dims <= num_dims, "Cannot reduce the number of dimensions of a shape.\n");
+shape_t* shape_extend_to_dims(shape_t* shape, int num_dims){
+    NDEBUG_ASSERT(shape->num_dims <= num_dims, "Cannot reduce the number of dimensions of a shape.\n");
     int num_new_dims = num_dims - shape->num_dims;
     size_t dims[num_dims];
     for(int index = 0; index < num_new_dims; index++){
@@ -64,5 +65,5 @@ shape_t* _extend_shape_to_dims(const shape_t* shape, int num_dims){
     for(int index = num_new_dims; index < num_dims; index++){
         dims[index] = shape->dims[index];
     }
-    return _new_shape(num_dims, dims);
+    return shape_new(num_dims, dims);
 }
