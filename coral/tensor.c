@@ -170,6 +170,7 @@ void tensor_display_dim_3(tensor_t* tensor){
 }
 
 void tensor_display(tensor_t* tensor){
+    shape_display(tensor->shape);
     switch(TENSOR_NUM_DIMS(tensor)){
         case 1:
             tensor_display_dim_1(tensor);

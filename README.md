@@ -10,10 +10,11 @@ TODO:
         - for now, change `.._grad` functions to `..._grad_backwards` functions
     - ✅ [#0] Extend broadcasting to more lenient numpy broadcasting scheme where dimensions can be 1 by fixing broadcast logic in tensor.c
     - ✅ [#1] add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns) as well as reductions (sum along dimensions)
-    - 🏗️ Switch naming convention so as to remove function names starting with `_` (see naming convention below)
+    - ✅ Switch naming convention so as to remove function names starting with `_` (see naming convention below)
         - see https://softwareengineering.stackexchange.com/a/115564
     - 🏗️ find some graceful way of dealing with unused grad parameters 
         - right now, n-ary functions are assumed to have n-ary gradients, but in many cases the gradient function for a particular variable only involves some subset of the other variables. for example: (d/dx)(x+y) doesn't involve either of x or y. 
+    - 🏗️ beautify display functions
     - 🏗️ [#2] add in loss functions (including reductions)
     - 🏗️ [#3] add in matrix multiplications
     - 🏗️ [#4] assert that dimenions are correct/compatible when doing operations

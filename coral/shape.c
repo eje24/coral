@@ -4,6 +4,7 @@
 
 shape_t* shape_new(int num_dims, size_t* dims){
     shape_t* new_shape = (shape_t*) malloc(sizeof(shape_t));
+    new_shape->num_dims = num_dims;
     new_shape->dims = (size_t*) malloc(num_dims * sizeof(size_t));
     new_shape->strides = (size_t*) malloc(num_dims * sizeof(size_t));
     for(int index = 0; index < num_dims; index++){
@@ -63,7 +64,23 @@ shape_t* shape_extend_to_dims(shape_t* shape, int num_dims){
         dims[index] = 1;
     }
     for(int index = num_new_dims; index < num_dims; index++){
-        dims[index] = shape->dims[index];
+        dims[index] = shape->dims[index - num_new_dims];
     }
     return shape_new(num_dims, dims);
+}
+
+void shape_display(shape_t* shape){
+    printf("Dimensions: ");
+    printf("%zu", shape->dims[0]);
+    for(int index = 1; index < shape->num_dims; index++){
+        printf(" x %zu", shape->dims[index]);
+    }
+    printf("\n");
+    printf("Strides: ");
+    printf("%zu", shape->strides[0]);
+    for(int index = 1; index < shape->num_dims; index++){
+        printf(" x %zu", shape->strides[index]);
+    }
+    printf("\n");
+    printf("Size: %zu\n", shape->size);
 }

@@ -8,6 +8,8 @@ int main() {
     variable_t* y = variable_new(1, 4);
     variable_set_to_scalar_value(x, 10);
     variable_set_to_scalar_value(y, 2);
+    variable_display(x);
+    variable_display(y);
     variable_t* z = variable_add(x, y);
     variable_display(x);
     variable_display(y);
