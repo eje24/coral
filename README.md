@@ -25,6 +25,14 @@ TODO:
     - 🏗️ standardize naming (child vs parent?? left/right variable/entry/arg??)
         - move toward arg/result naming scheme
     - 🏗️ start test suite
+        - add test built target
+        - add one main driver which calls test_variable, test_tensor, test_shape, test_grad, etc
+        - should at least contain:
+            - tests for broadcasting
+            - tests for each forwards operation (computes correct result)
+            - tests autograd
+                - correct graph
+                - correctly computes gradients
     - 🏗️ add struct constant_t, and make variable_t an extension
     - 🏗️ enable link-time optimization (quick)
     - extend tensor index/entry value lambda broadcasts to variable
