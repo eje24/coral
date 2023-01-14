@@ -1,6 +1,6 @@
 # coral
 
-A simple PyTorch-inspired deep learning framework in C.
+A simple PyTorch-inspired deep learning framework and tensor library in C.
 
 OVERVIEW OF COMPONENTS:
 - variable_t: user-facing object, holds both data (tensor_t*) and grad metadata (grad_meta_t*) allowing for automatic differentiation
