@@ -137,7 +137,6 @@ void tensor_in_place_apply_entry_fn(tensor_t* tensor, tensor_entry_unary_fn_t en
 */
 
 void tensor_display_dim_1(tensor_t* tensor){
-    printf("Dimensions: %zu\n", tensor->shape->dims[0]);
     for(size_t dim0_index = 0; dim0_index < tensor->shape->dims[0]; dim0_index++){
         printf("%f ", tensor->data[dim0_index]);
     }
@@ -145,7 +144,6 @@ void tensor_display_dim_1(tensor_t* tensor){
 }
 
 void tensor_display_dim_2(tensor_t* tensor){
-    printf("Dimensions: %zu x %zu\n", tensor->shape->dims[0], tensor->shape->dims[1]);
     for(size_t dim0_index = 0; dim0_index < tensor->shape->dims[0]; dim0_index++){
         for(size_t dim1_index = 0; dim1_index < tensor->shape->dims[1]; dim1_index++){
             size_t index = dim0_index * tensor->shape->dims[1] + dim1_index;
@@ -156,7 +154,6 @@ void tensor_display_dim_2(tensor_t* tensor){
 }
 
 void tensor_display_dim_3(tensor_t* tensor){
-    printf("Dimensions: %zu x %zu x %zu\n", tensor->shape->dims[0], tensor->shape->dims[1], tensor->shape->dims[2]);
     for(size_t dim0_index = 0; dim0_index < tensor->shape->dims[0]; dim0_index++){
         for(size_t dim1_index = 0; dim1_index < tensor->shape->dims[1]; dim1_index++){
             for(size_t dim2_index = 0; dim2_index < tensor->shape->dims[2]; dim2_index++){

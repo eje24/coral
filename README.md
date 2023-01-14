@@ -2,6 +2,13 @@
 
 A simple PyTorch-inspired deep learning framework in C.
 
+OVERVIEW OF COMPONENTS:
+- variable_t: user-facing object, holds both data (tensor_t*) and grad metadata (grad_meta_t*) allowing for automatic differentiation
+- tensor_t: container for raw data and metadata describing size, dimensions, etc
+- shape_t: stores metadata describing a chunk of data (num_dims, size, dims, strides)
+- grad_meta_t: stores grad-related metadata for a node (variable_t) in the computation graph. explicitly, stores the number of arguments, and an array of diff_arg_t's, one for each argument
+- diff_arg_t: an argument with respect to which a given function is differentiable, holds a pointer (variable_t*) to the variable
+
 TODO:
 - misc
     - ✅ change name (DONE)

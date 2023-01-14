@@ -17,8 +17,10 @@ struct variable {
 
 variable_t* variable_new(int num_dims, ...);
 variable_t* variable_new_from_tensor(tensor_t* tensor);
+variable_t* variable_view_as(variable_t* variable, int num_dims, ...);
 variable_t* variable_new_like(variable_t* old_variable);
 variable_t* variable_copy(variable_t* old_variable);
+void variable_in_place_apply_index_fn(variable_t* variable, tensor_index_fn_t index_fn);
 
 static inline bool is_scalar(variable_t* variable){
     return tensor_is_scalar(variable->tensor);

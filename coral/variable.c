@@ -33,6 +33,21 @@ variable_t* variable_new(int num_dims, ...){
     return variable_new_from_tensor(new_tensor);
 }
 
+variable_t* variable_view_as(variable_t* variable, int num_dims, ...){
+    // parse dim arguments
+    size_t dims[num_dims];
+    va_list dim_args;
+    va_start(dim_args, num_dims);
+    for(uint8_t dim_index = 0; dim_index < num_dims; dim_index++){
+        dims[dim_index] = va_arg(dim_args, size_t);
+    }
+    va_end(dim_args);
+    shape_t* shape = shape_new(num_dims, &dims[0]);
+    tensor_t* new_tensor = tensor_view_as(variable->tensor, shape);
+    return variable_new_from_tensor(new_tensor);
+}
+
+
 // creates a new variable with tensor of the same dimensions as old_variable
 variable_t* variable_new_like(variable_t* old_variable){
     tensor_t* new_tensor = tensor_new_like(old_variable->tensor);
@@ -43,6 +58,14 @@ variable_t* variable_new_like(variable_t* old_variable){
 variable_t* variable_copy(variable_t* old_variable){
     tensor_t* new_tensor = tensor_copy(old_variable->tensor);
     return variable_new_from_tensor(new_tensor);
+}
+
+/**
+ * MUTATE EXISTING VARIABLE
+*/
+
+void variable_in_place_apply_index_fn(variable_t* variable, tensor_index_fn_t index_fn){
+    tensor_in_place_apply_index_fn(variable->tensor, index_fn);
 }
 
 /**

@@ -31,6 +31,7 @@ tensor_t* tensor_new(shape_t* shape);
 tensor_t* tensor_new_like(tensor_t* old_tensor);
 tensor_t* tensor_new_zeros_like(tensor_t* old_tensor);
 tensor_t* tensor_copy(tensor_t* old_tensor);
+tensor_t* tensor_view_as(tensor_t* tensor, shape_t* new_shape);
 
 bool tensor_is_scalar(tensor_t* tensor);
 
@@ -39,6 +40,14 @@ void tensor_in_place_multiply_by_scalar_value(tensor_t* tensor, tensor_entry_t v
 void tensor_in_place_multiply(tensor_t* multiplicand, tensor_t* multiplier);
 void tensor_in_place_apply_index_fn(tensor_t* tensor, tensor_index_fn_t index_fn);
 void tensor_in_place_apply_entry_fn(tensor_t* tensor, tensor_entry_unary_fn_t entry_fn);
+
+/**
+ * TENSOR_INDEX_FN_T's, TENSOR_ENTRY_FN_T's
+*/
+
+static inline tensor_entry_t index_identity(size_t index){
+    return index;
+}
 
 /**
  * GETTERS AND SETTERS
