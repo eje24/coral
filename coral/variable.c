@@ -194,6 +194,14 @@ variable_t* sum(variable_t* variable, bool use_grad){
     return new_variable;
 }
 
+tensor_t* mean_grad_backwards(variable_t* arg, variable_t* result){
+    return tensor_multiply(tensor_mean_grad(arg->tensor), result->tensor);
+}
+
+variable_t* mean(variable_t* variable, bool use_grad){
+
+}
+
 /**
  * EXTERNAL FUNCTIONS
 */
@@ -218,12 +226,20 @@ variable_t* variable_sum(variable_t* variable){
     return sum(variable, true);
 }
 
+variable_t* variable_mean(variable_t* variable){
+
+}
+
 /**
  * LOSS FUNCTIONS
 */
 
-variable_t* l1_loss();
+// mean absolute error
+variable_t* mae_loss(variable_t* actual, variable_t* expected){
+    return variable_abs_value(variable_subtract(actual, expected));
+}
 
+// mean squared error
 variable_t* l2_loss();
 
 

@@ -19,6 +19,8 @@ TODO:
     - ✅ [#1] add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns) as well as reductions (sum along dimensions)
     - ✅ Switch naming convention so as to remove function names starting with `_` (see naming convention below)
         - see https://softwareengineering.stackexchange.com/a/115564
+    - 🏗️ add new scalar_grad_op function, for functions which use scalars (ie, tensor_divide_by_scalar, etc)
+    - 🏗️ add ability to perform operations on various dimensions (mean along dimension zero, axes in numpy)
     - 🏗️ find some graceful way of dealing with unused grad parameters 
         - right now, n-ary functions are assumed to have n-ary gradients, but in many cases the gradient function for a particular variable only involves some subset of the other variables. for example: (d/dx)(x+y) doesn't involve either of x or y. 
     - 🏗️ beautify display functions
@@ -80,8 +82,12 @@ AUTOGRAD:
     - num_parents
     - pointers to parents (two should be fine)
     - pointer to variable
-- each function comes with a grad version of the function
+- each "atomic" function comes with a grad version of the function
     - takes in gradient of output (variable_t)
+    - every function is either atomic, or can be constructed as the composition of some number of atomic functions
+    - sometimes, there is some redundancy in which functions are given grads, for example, both sum, divide, and mean have grads, although, as mean is the composition of sum and divide, it does not need its own grad
+        - in general, it helps to provide as many functions as possible with dedicated grad functions, as compositions are expensive, and should be left for arbitrary user-defined functions
+    - this simplifies the computation graph
 
 
 PERFORMANCE CONSIDERATIONS:

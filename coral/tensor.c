@@ -37,6 +37,12 @@ tensor_t* tensor_new_like(tensor_t* tensor){
     return tensor_new(tensor->shape);
 }
 
+tensor_t* tensor_new_like_with_value(tensor_t* tensor, tensor_entry_t value){
+    tensor_t* new_tensor = tensor_new_like(tensor);
+    tensor_set_to_scalar_value(new_tensor, value);
+    return new_tensor;
+}
+
 // the same as tensor_new_like (for now)
 tensor_t* tensor_new_zeros_like(tensor_t* tensor){
     return tensor_new(tensor->shape);
@@ -95,22 +101,6 @@ void tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value){
     size_t tensor_size = tensor_get_size(tensor);
     for(size_t index = 0; index < tensor_size; index++){
         tensor_set_entry(tensor, index, value);
-    }
-}
-
-void tensor_in_place_multiply_by_scalar_value(tensor_t* tensor, tensor_entry_t value){
-    size_t tensor_size = tensor_get_size(tensor);
-    for(size_t index = 0; index < tensor_size; index++){
-        tensor_entry_t new_value = value * tensor_get_entry(tensor, index);
-        tensor_set_entry(tensor, index, new_value);
-    }
-}
-
-void tensor_in_place_multiply(tensor_t* multiplicand, tensor_t* multiplier){
-    size_t tensor_size = tensor_get_size(multiplicand);
-    for(size_t index = 0; index < tensor_size; index++){
-        tensor_entry_t new_value = tensor_get_entry(multiplicand, index) * tensor_get_entry(multiplier, index);
-        tensor_set_entry(multiplicand, index, new_value);
     }
 }
 
@@ -235,6 +225,11 @@ static inline tensor_entry_t tensor_entry_subtract(tensor_entry_t left_entry, te
     return left_entry - right_entry;
 }
 
+static inline tensor_entry_t tensor_entry_divide(tensor_entry_t left_entry, tensor_entry_t right_entry) {
+    NDEBUG_ASSERT(right_entry != 0, "Cannot divide by zero!");
+    return left_entry / right_entry;
+}
+
 static inline tensor_entry_t tensor_entry_abs_grad(tensor_entry_t entry){
     return entry >= 0 ? 1 : -1;
 }
@@ -296,16 +291,36 @@ tensor_t* tensor_broadcast_fn(tensor_t* left_tensor, tensor_t* right_tensor, ten
  * MUTATING FUNCTIONS
 */
 
-void tensor_add_to_existing(tensor_t* left_tensor, tensor_t* right_tensor){
+void tensor_in_place_add(tensor_t* left_tensor, tensor_t* right_tensor){
     in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &tensor_entry_add);
 }
 
-void tensor_subtract_to_existing(tensor_t* left_tensor, tensor_t* right_tensor){
+void tensor_in_place_subtract(tensor_t* left_tensor, tensor_t* right_tensor){
     in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &tensor_entry_subtract);
 }
 
-void tensor_multiply_to_existing(tensor_t* left_tensor, tensor_t* right_tensor){
+void tensor_in_place_multiply(tensor_t* left_tensor, tensor_t* right_tensor){
     in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &tensor_entry_multiply);
+}
+
+void tensor_in_place_divide(tensor_t* left_tensor, tensor_t* right_tensor){
+    in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &tensor_entry_divide);
+}
+
+void tensor_in_place_multiply_by_scalar(tensor_t* tensor, tensor_entry_t value){
+    size_t tensor_size = tensor_get_size(tensor);
+    for(size_t index = 0; index < tensor_size; index++){
+        tensor_entry_t new_value = tensor_entry_multiply(tensor_get_entry(tensor, index), value);
+        tensor_set_entry(tensor, index, new_value);
+    }
+}
+
+void tensor_in_place_divide_by_scalar(tensor_t* tensor, tensor_entry_t value){
+    size_t tensor_size = tensor_get_size(tensor);
+    for(size_t index = 0; index < tensor_size; index++){
+        tensor_entry_t new_value = tensor_entry_divide(tensor_get_entry(tensor, index), value);
+        tensor_set_entry(tensor, index, new_value);
+    }
 }
 
 /**
@@ -325,6 +340,31 @@ tensor_t* tensor_subtract(tensor_t* left_tensor, tensor_t* right_tensor){
 
 tensor_t* tensor_multiply(tensor_t* left_tensor, tensor_t* right_tensor){
     return tensor_broadcast_fn(left_tensor, right_tensor, &tensor_entry_multiply);
+}
+
+tensor_t* tensor_divide(tensor_t* left_tensor, tensor_t* right_tensor){
+    return tensor_broadcast_fn(left_tensor, right_tensor, &tensor_entry_divide);
+}
+
+tensor_t* tensor_multiply_by_scalar_grad(tensor_t* tensor, tensor_entry_t value){
+    return tensor_new_like_with_value(tensor, value);
+}
+
+tensor_t* tensor_multiply_by_scalar(tensor_t* tensor, tensor_entry_t value){
+    tensor_t* new_tensor = copy_tensor(tensor);
+    tensor_in_place_multiply_by_scalar(new_tensor, value);
+    return new_tensor;
+}
+
+tensor_t* tensor_divide_by_scalar_grad(tensor_t* tensor, tensor_entry_t value){
+    NDEBUG_ASSERT(value != 0, "Cannot divide by zero!");
+    return tensor_new_like_with_value(tensor, 1 / value);
+}
+
+tensor_t* tensor_divide_by_scalar(tensor_t* tensor, tensor_entry_t value){
+    tensor_t* new_tensor = copy_tensor(tensor);
+    tensor_in_place_divide_by_scalar(new_tensor, value);
+    return new_tensor;
 }
 
 tensor_t* tensor_abs_grad(tensor_t* tensor){
@@ -353,3 +393,17 @@ tensor_t* tensor_sum(tensor_t* tensor){
     }
     return tensor_new_from_entry(sum);
 }
+
+tensor_t* tensor_mean_grad(tensor_t* tensor){
+    return tensor_divide(tensor_sum_grad(tensor), )
+}
+
+tensor_t* tensor_mean(tensor_t* tensor){
+    NDEBUG_ASSERT(tensor_get_size(tensor), "Cannot take mean of tensor of size zero!");
+    return tensor_divide_by_scalar(tensor_sum(tensor), tensor_get_size(tensor));
+}
+
+/**
+ * add tensor divide (with appropriate checks
+ * add tensor divide in place )
+*/

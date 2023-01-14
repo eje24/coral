@@ -38,8 +38,6 @@ bool tensor_equal(tensor_t* left_tensor, tensor_t* right_tensor);
 bool tensor_is_scalar(tensor_t* tensor);
 
 void tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value);
-void tensor_in_place_multiply_by_scalar_value(tensor_t* tensor, tensor_entry_t value);
-void tensor_in_place_multiply(tensor_t* multiplicand, tensor_t* multiplier);
 void tensor_in_place_apply_index_fn(tensor_t* tensor, tensor_index_fn_t index_fn);
 void tensor_in_place_apply_entry_fn(tensor_t* tensor, tensor_entry_unary_fn_t entry_fn);
 
@@ -72,13 +70,19 @@ void tensor_set_to_fn_value(tensor_t* tensor, tensor_index_fn_t index_fn);
 
 void tensor_display(tensor_t* tensor);
 
-void tensor_add_to_existing(tensor_t* left_tensor, tensor_t* right_tensor);
-void tensor_subtract_to_existing(tensor_t* left_tensor, tensor_t* right_tensor);
-void tensor_multiply_to_existing(tensor_t* left_tensor, tensor_t* right_tensor);
+void tensor_in_place_add(tensor_t* left_tensor, tensor_t* right_tensor);
+void tensor_in_place_subtract(tensor_t* left_tensor, tensor_t* right_tensor);
+void tensor_in_place_multiply(tensor_t* left_tensor, tensor_t* right_tensor);
+void tensor_in_place_multiply_by_scalar(tensor_t* tensor, tensor_entry_t value);
+void tensor_in_place_divide_by_scalar(tensor_t* tensor, tensor_entry_t value);
+
 
 tensor_t* tensor_add(tensor_t* left_tensor, tensor_t* right_tensor);
 tensor_t* tensor_subtract(tensor_t* left_tensor, tensor_t* right_tensor);
 tensor_t* tensor_multiply(tensor_t* left_tensor, tensor_t* right_tensor);
+tensor_t* tensor_divide(tensor_t* left_tensor, tensor_t* right_tensor);
+tensor_t* tensor_multiply_by_scalar(tensor_t* tensor, tensor_entry_t value);
+tensor_t* tensor_divide_by_scalar(tensor_t* tensor, tensor_entry_t value);
 tensor_t* tensor_abs_grad(tensor_t* tensor);
 tensor_t* tensor_abs(tensor_t* tensor);
 tensor_t* tensor_sum_grad(tensor_t* tensor);
