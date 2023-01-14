@@ -22,6 +22,9 @@ variable_t* variable_new_like(variable_t* old_variable);
 variable_t* variable_copy(variable_t* old_variable);
 void variable_in_place_apply_index_fn(variable_t* variable, tensor_index_fn_t index_fn);
 
+bool variable_equal(variable_t* left_variable, variable_t* right_variable);
+bool variable_alias(variable_t* left_variable, variable_t* right_variable);
+
 static inline bool is_scalar(variable_t* variable){
     return tensor_is_scalar(variable->tensor);
 }

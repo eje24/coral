@@ -1,8 +1,13 @@
 CC := clang
+
 TARGET := main
+TEST_TARGET := test
+
 SRC = main.c variable.c tensor.c grad.c shape.c
+TEST_SRC = test.c variable.c tensor.c grad.c shape.c
+
 OBJ := $(SRC:.c=.o)
-DEP := $(OBJ:%.o=%.d)
+TEST_OBJ := $(TEST_SRC:.c=.o)
 
 COMMONFLAGS := -Wall -Werror -Wextra
 CFLAGS := $(COMMONFLAGS) -std=gnu99 -g -flto
@@ -17,8 +22,11 @@ endif
 $(TARGET): $(OBJ)
 	$(CC) $(LDFLAGS) $^ -o $@
 
+$(TEST_TARGET): $(TEST_OBJ)
+	$(CC) $(LDFLAGS) $^ -o $@
+
 %.o: %.c Makefile
 	$(CC) $(CFLAGS) -MMD -c $< -o $@
 
 clean:
-	rm -f *.o *.d main
+	rm -f *.o *.d main test

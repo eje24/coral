@@ -18,5 +18,4 @@ int main() {
     variable_display(z1);
     variable_display(z2);
     variable_display(z3);
-    DEBUG_ASSERT(0, "Oh no, %d\n", 3);
 }

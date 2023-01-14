@@ -33,6 +33,8 @@ tensor_t* tensor_new_zeros_like(tensor_t* old_tensor);
 tensor_t* tensor_copy(tensor_t* old_tensor);
 tensor_t* tensor_view_as(tensor_t* tensor, shape_t* new_shape);
 
+bool tensor_equal(tensor_t* left_tensor, tensor_t* right_tensor);
+
 bool tensor_is_scalar(tensor_t* tensor);
 
 void tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value);

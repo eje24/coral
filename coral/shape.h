@@ -16,6 +16,7 @@ typedef struct {
 
 shape_t* shape_new(int num_dims, size_t* dims);
 shape_t* shape_copy(shape_t* shape);
+bool shape_equal(shape_t* left_shape, shape_t* right_shape);
 shape_t* shape_get_broadcast_shape(shape_t* left_shape, shape_t* right_shape);
 bool shape_broadcast_compatible(shape_t* left_shape, shape_t* right_shape);
 shape_t* shape_extend_to_dims(shape_t* shape, int num_dims);

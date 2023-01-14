@@ -61,6 +61,22 @@ variable_t* variable_copy(variable_t* old_variable){
 }
 
 /**
+ * COMPARATORS
+*/
+
+// returns True if and only if the (tensor_t) contents are the same
+// irrespective of autograd information
+bool variable_equal(variable_t* left_variable, variable_t* right_variable){
+    return tensor_equal(left_variable->tensor, right_variable->tensor);
+}
+
+// returns True if and only if the variables share the same data
+// irrespective of shape 
+bool variable_alias(variable_t* left_variable, variable_t* right_variable){
+    return (left_variable->tensor->data == right_variable->tensor->data);
+}
+
+/**
  * MUTATE EXISTING VARIABLE
 */
 

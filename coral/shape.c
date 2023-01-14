@@ -1,6 +1,7 @@
 #include "shape.h"
-#include "stdbool.h"
 #include "assert.h"
+#include <stdbool.h>
+
 
 shape_t* shape_new(int num_dims, size_t* dims){
     shape_t* new_shape = (shape_t*) malloc(sizeof(shape_t));
@@ -21,6 +22,19 @@ shape_t* shape_new(int num_dims, size_t* dims){
 
 shape_t* shape_copy(shape_t* shape){
     return shape_new(shape->num_dims, shape->dims);
+}
+
+bool shape_equal(shape_t* left_shape, shape_t* right_shape){
+    if((left_shape->size != right_shape->size) || (left_shape->num_dims != right_shape->num_dims)){
+        return 0;
+    }
+    // otherwise, both shapse have the same size and dimensions
+    for(int dim_index = 0; dim_index < left_shape->num_dims; dim_index++){
+        if(left_shape->dims[dim_index] != right_shape->dims[dim_index]){
+            return 0;
+        }
+    }
+    return 1;
 }
 
 shape_t* shape_get_broadcast_shape(shape_t* left_shape, shape_t* right_shape){

@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "assert.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> 
 #include <stdbool.h>
 #include <string.h>
 
@@ -56,11 +56,25 @@ tensor_t* tensor_copy(tensor_t* old_tensor){
     return new_tensor;
 }
 
+// creates new tensor with desired shape pointing to the same underlying data
 tensor_t* tensor_view_as(tensor_t* tensor, shape_t* new_shape){
     NDEBUG_ASSERT(new_shape->size == tensor->shape->size, "Tensor cannot be viewed in that shape!\n");
-    tensor_t* new_tensor = tensor_copy(tensor);
+    tensor_t* new_tensor = (tensor_t*) malloc(sizeof(tensor_t));
+    new_tensor->data = tensor->data;
     new_tensor->shape = shape_copy(new_shape);
     return new_tensor;
+}
+
+/**
+ * COMPARATORS
+*/
+
+bool tensor_equal(tensor_t* left_tensor, tensor_t* right_tensor){
+    if(!shape_equal(left_tensor->shape, right_tensor->shape)){
+        return 0;
+    }
+    int cmp = memcmp(left_tensor->data, right_tensor->data, tensor_get_size_in_bytes(left_tensor)); 
+    return (cmp == 0);
 }
 
 
