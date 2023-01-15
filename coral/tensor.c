@@ -380,9 +380,7 @@ tensor_t* tensor_abs(tensor_t* tensor){
 }
 
 tensor_t* tensor_sum_grad(tensor_t* tensor){
-    tensor_t* grad_tensor = tensor_new_like(tensor);
-    tensor_set_to_scalar_value(grad_tensor, 1);
-    return grad_tensor;
+    return tensor_new_like_with_value(tensor, 1.0);
 }
 
 tensor_t* tensor_sum(tensor_t* tensor){
@@ -395,7 +393,7 @@ tensor_t* tensor_sum(tensor_t* tensor){
 }
 
 tensor_t* tensor_mean_grad(tensor_t* tensor){
-    return tensor_divide(tensor_sum_grad(tensor), )
+    return tensor_divide(tensor_new_like_with_value(tensor, 1), tensor_get_size(tensor));
 }
 
 tensor_t* tensor_mean(tensor_t* tensor){

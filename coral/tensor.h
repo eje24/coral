@@ -29,6 +29,7 @@ typedef tensor_entry_t (* tensor_index_fn_t)(size_t index);
 
 tensor_t* tensor_new(shape_t* shape);
 tensor_t* tensor_new_like(tensor_t* old_tensor);
+tensor_t* tensor_new_like_with_value(tensor_t* old_tensor, tensor_entry_t value);
 tensor_t* tensor_new_zeros_like(tensor_t* old_tensor);
 tensor_t* tensor_copy(tensor_t* old_tensor);
 tensor_t* tensor_view_as(tensor_t* tensor, shape_t* new_shape);

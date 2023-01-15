@@ -56,12 +56,15 @@ struct grad_meta{
     diff_arg_t* args[2];
 };
 
-static inline grad_meta_t* _default_grad_meta(){
+static inline grad_meta_t* grad_meta_new(){
     grad_meta_t* new_grad_meta = (grad_meta_t*) malloc(sizeof(grad_meta_t));
     new_grad_meta->ref_count = 0;
     new_grad_meta->num_args = 0;
     return new_grad_meta;
 }
+
+void variable_display(variable_t* variable);
+void variable_display_with_gradient(variable_t* variable);
 
 variable_t* variable_add(variable_t* left_variable, variable_t* right_variable);
 variable_t* variable_subtract(variable_t* left_variable, variable_t* right_variable);
@@ -69,8 +72,8 @@ variable_t* variable_multiply(variable_t* left_variable, variable_t* right_varia
 variable_t* variable_abs_value(variable_t* variable);
 variable_t* variable_sum(variable_t* variable);
 
-void variable_display(variable_t* variable);
-void variable_display_with_gradient(variable_t* variable);
+variable_t* variable_mae_loss(variable_t* actual, variable_t* expected);
+variable_t* variable_mse_loss(variable_t* actual, variable_t* expected);
 
 static inline tensor_entry_t get_entry(variable_t* variable, size_t index){
     return tensor_get_entry(variable->tensor, index);

@@ -18,6 +18,14 @@ void test_variable_equality(){
     NDEBUG_ASSERT(variable_alias(z2, z3), "Variables z2, z2 are aliases.");
 }
 
+void test_variable_add();
+void test_variable_subtract();
+void test_variable_multiply();
+void test_varaible_square();
+void test_variable_abs();
+
+void test_backwards();
+
 
 int main(){
     test_variable_equality();

@@ -166,6 +166,20 @@ variable_t* multiply(variable_t* left_variable, variable_t* right_variable, bool
     return new_variable;
 }
 
+tensor_t* square_grad_backwards(variable_t* variable, variable_t* result){
+    return tensor_multiply(tensor_multiply_by_scalar(variable->tensor, 2.0), result->gradient);
+}
+
+// note that square is equivalent (in terms of correctness of result and grad meta update) to multiply
+
+variable_t* square(variable_t* variable, bool use_grad){
+    variable_t* new_variable = new_variable_from_tensor(tensor_multiply(variable->tensor, variable->tensor));
+    if(use_grad){
+        set_unary_grad_meta(new_variable, variable, &square_grad_backwards);
+    }
+    return new_variable;
+}
+
 tensor_t* abs_value_grad_backwards(variable_t* arg, variable_t* result){
     return tensor_multiply(tensor_abs(arg->tensor), result->gradient);
 }
@@ -186,8 +200,7 @@ tensor_t* sum_grad_backwards(variable_t* arg, variable_t* result){
 }
 
 variable_t* sum(variable_t* variable, bool use_grad){
-    tensor_t* new_tensor = tensor_sum(variable->tensor);
-    variable_t* new_variable = variable_new_from_tensor(new_tensor);
+    variable_t* new_variable = variable_new_from_tensor(tensor_sum(variable->tensor));
     if(use_grad){
         set_unary_grad_meta(new_variable, variable, &sum_grad_backwards);
     }
@@ -199,7 +212,11 @@ tensor_t* mean_grad_backwards(variable_t* arg, variable_t* result){
 }
 
 variable_t* mean(variable_t* variable, bool use_grad){
-
+    variable_t* new_variable = variable_new_from_tensor(tensor_mean(variable->tensor));
+    if(use_grad){
+        set_unary_grad_meta(new_variable, variable, &mean_grad_backwards);
+    }
+    return new_variable;
 }
 
 /**
@@ -218,6 +235,10 @@ variable_t* variable_multiply(variable_t* left_variable, variable_t* right_varia
     return multiply(left_variable, right_variable, true);
 }
 
+variable_t* variable_square(variable_t* variable){
+    return square(variable, true);
+}
+
 variable_t* variable_abs_value(variable_t* variable){
     return abs_value(variable, true);
 }
@@ -227,7 +248,7 @@ variable_t* variable_sum(variable_t* variable){
 }
 
 variable_t* variable_mean(variable_t* variable){
-
+    return mean(variable, true);
 }
 
 /**
@@ -235,11 +256,13 @@ variable_t* variable_mean(variable_t* variable){
 */
 
 // mean absolute error
-variable_t* mae_loss(variable_t* actual, variable_t* expected){
-    return variable_abs_value(variable_subtract(actual, expected));
+variable_t* variable_mae_loss(variable_t* actual, variable_t* expected){
+    return variable_mean(variable_abs_value(variable_subtract(actual, expected)));
 }
 
 // mean squared error
-variable_t* l2_loss();
+variable_t* variable_mse_loss(variable_t* actual, variable_t* expected){
+    return variable_mean(variable_square(variable_subtract(actual, expected)));
+}
 
 

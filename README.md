@@ -43,8 +43,6 @@ TODO:
                 - correct graph
                 - correctly computes gradients
     - 🏗️ add struct constant_t, and make variable_t an extension
-    - 🏗️ byte-align tensor data
-    - 🏗️ enable link-time optimization (quick)
     - extend tensor index/entry value lambda broadcasts to variable
     - 🏗️ reference count and "garbage collect" old tensors
     - ✅ shape_t update (for keeping track of tensor dims)
@@ -92,6 +90,8 @@ AUTOGRAD:
 
 PERFORMANCE CONSIDERATIONS:
 - most gradient functions won't actually be inlined
+- 🏗️ byte-align tensor data
+- 🏗️ enable link-time optimization (quick)
 
 OOP Conventions:
 - interface functions always `[MODULE_NAME]_[FUNCTION_NAME]`
