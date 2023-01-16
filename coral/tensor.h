@@ -32,13 +32,14 @@ tensor_t* tensor_new_like(tensor_t* old_tensor);
 tensor_t* tensor_new_like_with_value(tensor_t* old_tensor, tensor_entry_t value);
 tensor_t* tensor_new_zeros_like(tensor_t* old_tensor);
 tensor_t* tensor_copy(tensor_t* old_tensor);
-tensor_t* tensor_view_as(tensor_t* tensor, shape_t* new_shape);
+tensor_t* tensor_view_as_shape(tensor_t* tensor, shape_t* new_shape);
 
 bool tensor_equal(tensor_t* left_tensor, tensor_t* right_tensor);
 
 bool tensor_is_scalar(tensor_t* tensor);
 
 void tensor_set_to_scalar_value(tensor_t* tensor, tensor_entry_t value);
+void tensor_in_place_view_as_shape(tensor_t* tensor, shape_t* new_shape);
 void tensor_in_place_apply_index_fn(tensor_t* tensor, tensor_index_fn_t index_fn);
 void tensor_in_place_apply_entry_fn(tensor_t* tensor, tensor_entry_unary_fn_t entry_fn);
 
@@ -88,5 +89,7 @@ tensor_t* tensor_abs_grad(tensor_t* tensor);
 tensor_t* tensor_abs(tensor_t* tensor);
 tensor_t* tensor_sum_grad(tensor_t* tensor);
 tensor_t* tensor_sum(tensor_t* tensor);
+tensor_t* tensor_mean_grad(tensor_t* tensor);
+tensor_t* tensor_mean(tensor_t* tensor);
 
 #endif // TENSOR_H

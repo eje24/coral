@@ -9,6 +9,7 @@ OVERVIEW OF COMPONENTS:
 - grad_meta_t: stores grad-related metadata for a node (variable_t) in the computation graph. explicitly, stores the number of arguments, and an array of diff_arg_t's, one for each argument
 - diff_arg_t: an argument with respect to which a given function is differentiable, holds a pointer (variable_t*) to the variable
 
+
 TODO:
 - misc
     - ✅ change name (DONE)
@@ -20,6 +21,8 @@ TODO:
     - ✅ Switch naming convention so as to remove function names starting with `_` (see naming convention below)
         - see https://softwareengineering.stackexchange.com/a/115564
     - 🏗️ add new scalar_grad_op function, for functions which use scalars (ie, tensor_divide_by_scalar, etc)
+    - 🏗️ Add ability to differentiate through re-shape operations
+        - 🏗️ add a reshape grad, which just reshapes result grad and multiplies through via chain rule
     - 🏗️ add ability to perform operations on various dimensions (mean along dimension zero, axes in numpy)
     - 🏗️ find some graceful way of dealing with unused grad parameters 
         - right now, n-ary functions are assumed to have n-ary gradients, but in many cases the gradient function for a particular variable only involves some subset of the other variables. for example: (d/dx)(x+y) doesn't involve either of x or y. 

@@ -8,7 +8,7 @@
 static void update_unary_grad(diff_arg_t* arg, variable_t* result){
     variable_unary_grad_op_t gradient_fn = (variable_unary_grad_op_t) (arg->grad_op);
     tensor_t* gradient_update = (*gradient_fn)(arg->arg, result);
-    tensor_add_to_existing(arg->arg->gradient, gradient_update);
+    tensor_in_place_add(arg->arg->gradient, gradient_update);
     decrement_ref_count(arg->arg);
 }
 
@@ -17,7 +17,7 @@ static void update_unary_grad(diff_arg_t* arg, variable_t* result){
 static void update_binary_grad(diff_arg_t* arg, diff_arg_t* other_arg, variable_t* result){
     variable_binary_grad_op_t gradient_fn = (variable_binary_grad_op_t) (arg->grad_op);
     tensor_t* gradient_update = (*gradient_fn)(arg->arg, other_arg->arg, result);
-    tensor_add_to_existing(arg->arg->gradient, gradient_update);
+    tensor_in_place_add(arg->arg->gradient, gradient_update);
     decrement_ref_count(arg->arg);
 }
 

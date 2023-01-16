@@ -62,8 +62,13 @@ tensor_t* tensor_copy(tensor_t* old_tensor){
     return new_tensor;
 }
 
+void tensor_in_place_view_as_shape(tensor_t* tensor, shape_t* new_shape){
+    NDEBUG_ASSERT(new_shape->size == tensor->shape->size, "Tensor cannot be viewed in that shape!\n");
+    tensor->shape = shape_copy(new_shape);
+}
+
 // creates new tensor with desired shape pointing to the same underlying data
-tensor_t* tensor_view_as(tensor_t* tensor, shape_t* new_shape){
+tensor_t* tensor_view_as_shape(tensor_t* tensor, shape_t* new_shape){
     NDEBUG_ASSERT(new_shape->size == tensor->shape->size, "Tensor cannot be viewed in that shape!\n");
     tensor_t* new_tensor = (tensor_t*) malloc(sizeof(tensor_t));
     new_tensor->data = tensor->data;
@@ -272,9 +277,9 @@ void in_place_broadcast_fn(tensor_t* dest_tensor, tensor_t* source_tensor1, tens
     int source_dims2 = TENSOR_NUM_DIMS(source_tensor2);
     // pad the smaller tensor with leading dimensions of length 1 so that both tensors have the same number of dimensions
     if(source_dims1 < source_dims2){
-        source_tensor1 = tensor_view_as(source_tensor1, shape_extend_to_dims(source_tensor1->shape, source_dims2));
+        source_tensor1 = tensor_view_as_shape(source_tensor1, shape_extend_to_dims(source_tensor1->shape, source_dims2));
     }else if(source_dims1 > source_dims2){
-        source_tensor2 = tensor_view_as(source_tensor2, shape_extend_to_dims(source_tensor2->shape, source_dims1));
+        source_tensor2 = tensor_view_as_shape(source_tensor2, shape_extend_to_dims(source_tensor2->shape, source_dims1));
     }
     recursive_in_place_broadcast_fn(dest_tensor, source_tensor1, source_tensor2, 0, 0, 0, 0, tensor_entry_binary_fn);
 }
@@ -351,7 +356,7 @@ tensor_t* tensor_multiply_by_scalar_grad(tensor_t* tensor, tensor_entry_t value)
 }
 
 tensor_t* tensor_multiply_by_scalar(tensor_t* tensor, tensor_entry_t value){
-    tensor_t* new_tensor = copy_tensor(tensor);
+    tensor_t* new_tensor = tensor_copy(tensor);
     tensor_in_place_multiply_by_scalar(new_tensor, value);
     return new_tensor;
 }
@@ -362,7 +367,7 @@ tensor_t* tensor_divide_by_scalar_grad(tensor_t* tensor, tensor_entry_t value){
 }
 
 tensor_t* tensor_divide_by_scalar(tensor_t* tensor, tensor_entry_t value){
-    tensor_t* new_tensor = copy_tensor(tensor);
+    tensor_t* new_tensor = tensor_copy(tensor);
     tensor_in_place_divide_by_scalar(new_tensor, value);
     return new_tensor;
 }
@@ -393,7 +398,7 @@ tensor_t* tensor_sum(tensor_t* tensor){
 }
 
 tensor_t* tensor_mean_grad(tensor_t* tensor){
-    return tensor_divide(tensor_new_like_with_value(tensor, 1), tensor_get_size(tensor));
+    return tensor_divide_by_scalar(tensor_new_like_with_value(tensor, 1), tensor_get_size(tensor));
 }
 
 tensor_t* tensor_mean(tensor_t* tensor){

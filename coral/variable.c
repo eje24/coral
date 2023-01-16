@@ -15,7 +15,7 @@ variable_t* variable_new_from_tensor(tensor_t* tensor){
     variable_t* new_variable = (variable_t *) malloc(sizeof(variable_t));
     new_variable->tensor = tensor;
     new_variable->gradient = tensor_new_zeros_like(tensor);
-    new_variable->grad_meta = _default_grad_meta();
+    new_variable->grad_meta = grad_meta_new();
     return new_variable;
 }
 
@@ -33,6 +33,24 @@ variable_t* variable_new(int num_dims, ...){
     return variable_new_from_tensor(new_tensor);
 }
 
+void variable_in_place_view_as(variable_t* variable, int num_dims, ...){
+    // parse dim arguments
+    size_t dims[num_dims];
+    va_list dim_args;
+    va_start(dim_args, num_dims);
+    for(uint8_t dim_index = 0; dim_index < num_dims; dim_index++){
+        dims[dim_index] = va_arg(dim_args, size_t);
+    }
+    va_end(dim_args);
+    shape_t* shape = shape_new(num_dims, &dims[0]);
+    tensor_in_place_view_as_shape(variable->tensor, shape);
+}
+
+void variable_in_place_view_as_shape(variable_t* variable, shape_t* new_shape){
+    tensor_in_place_view_as_shape(variable->tensor, new_shape);
+}
+
+
 variable_t* variable_view_as(variable_t* variable, int num_dims, ...){
     // parse dim arguments
     size_t dims[num_dims];
@@ -43,14 +61,24 @@ variable_t* variable_view_as(variable_t* variable, int num_dims, ...){
     }
     va_end(dim_args);
     shape_t* shape = shape_new(num_dims, &dims[0]);
-    tensor_t* new_tensor = tensor_view_as(variable->tensor, shape);
+    tensor_t* new_tensor = tensor_view_as_shape(variable->tensor, shape);
     return variable_new_from_tensor(new_tensor);
+}
+
+variable_t* variable_view_as_shape(variable_t* variable, shape_t* new_shape){
+    return variable_new_from_tensor(tensor_view_as_shape(variable->tensor, new_shape));
 }
 
 
 // creates a new variable with tensor of the same dimensions as old_variable
 variable_t* variable_new_like(variable_t* old_variable){
     tensor_t* new_tensor = tensor_new_like(old_variable->tensor);
+    return variable_new_from_tensor(new_tensor);
+}
+
+// creates a new variable with tensor of the same dimensions as old_variable
+variable_t* variable_new_like_with_value(variable_t* old_variable, tensor_entry_t value){
+    tensor_t* new_tensor = tensor_new_like_with_value(old_variable->tensor, value);
     return variable_new_from_tensor(new_tensor);
 }
 
@@ -137,7 +165,7 @@ tensor_t* subtract_grad_backwards(variable_t* arg, variable_t* other_arg, variab
     UNUSED(arg);
     UNUSED(other_arg);
     tensor_t* child_grad = tensor_copy(child->gradient);
-    tensor_in_place_multiply_by_scalar_value(child_grad, -1);
+    tensor_in_place_multiply_by_scalar(child_grad, -1);
     return child_grad;
 }
 
@@ -173,7 +201,7 @@ tensor_t* square_grad_backwards(variable_t* variable, variable_t* result){
 // note that square is equivalent (in terms of correctness of result and grad meta update) to multiply
 
 variable_t* square(variable_t* variable, bool use_grad){
-    variable_t* new_variable = new_variable_from_tensor(tensor_multiply(variable->tensor, variable->tensor));
+    variable_t* new_variable = variable_new_from_tensor(tensor_multiply(variable->tensor, variable->tensor));
     if(use_grad){
         set_unary_grad_meta(new_variable, variable, &square_grad_backwards);
     }

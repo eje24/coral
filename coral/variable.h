@@ -18,9 +18,10 @@ struct variable {
 variable_t* variable_new(int num_dims, ...);
 variable_t* variable_new_from_tensor(tensor_t* tensor);
 variable_t* variable_view_as(variable_t* variable, int num_dims, ...);
+variable_t* variable_view_as_shape(variable_t* variable, shape_t* new_shape);
 variable_t* variable_new_like(variable_t* old_variable);
+variable_t* variable_new_like_with_value(variable_t* old_variable, tensor_entry_t value);
 variable_t* variable_copy(variable_t* old_variable);
-void variable_in_place_apply_index_fn(variable_t* variable, tensor_index_fn_t index_fn);
 
 bool variable_equal(variable_t* left_variable, variable_t* right_variable);
 bool variable_alias(variable_t* left_variable, variable_t* right_variable);
@@ -65,6 +66,10 @@ static inline grad_meta_t* grad_meta_new(){
 
 void variable_display(variable_t* variable);
 void variable_display_with_gradient(variable_t* variable);
+
+void variable_in_place_apply_index_fn(variable_t* variable, tensor_index_fn_t index_fn);
+void variable_in_place_view_as(variable_t* variable, int num_dims, ...);
+void variable_in_place_view_as_shape(variable_t* variable, shape_t* new_shape);
 
 variable_t* variable_add(variable_t* left_variable, variable_t* right_variable);
 variable_t* variable_subtract(variable_t* left_variable, variable_t* right_variable);
