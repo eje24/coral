@@ -4,6 +4,7 @@ A simple PyTorch-inspired deep learning framework and tensor library in C.
 
 OVERVIEW OF COMPONENTS:
 - variable_t: user-facing object, holds both data (tensor_t*) and grad metadata (grad_meta_t*) allowing for automatic differentiation
+    - this is similar to the (now deprecated) PyTorch Variable API
 - tensor_t: container for raw data and metadata describing size, dimensions, etc
 - shape_t: stores metadata describing a chunk of data (num_dims, size, dims, strides)
 - grad_meta_t: stores grad-related metadata for a node (variable_t) in the computation graph. explicitly, stores the number of arguments, and an array of diff_arg_t's, one for each argument
@@ -27,7 +28,8 @@ TODO:
     - 🏗️ find some graceful way of dealing with unused grad parameters 
         - right now, n-ary functions are assumed to have n-ary gradients, but in many cases the gradient function for a particular variable only involves some subset of the other variables. for example: (d/dx)(x+y) doesn't involve either of x or y. 
     - 🏗️ beautify display functions
-    - 🏗️ [#2] add in loss functions (including reductions)
+    - 🏗️ enable backpropogation from arbitary vertex (re-initialize `ref_count` values)
+    - ✅ [#2] add in loss functions (including reductions)
     - 🏗️ [#3] add in matrix multiplications
     - 🏗️ [#4] assert that dimenions are correct/compatible when doing operations
     - 🏗️ Sphinx documentatio (would be cool)
@@ -35,7 +37,8 @@ TODO:
     - 🏗️ functions which do not modify should have const arguments (_tensor_add, _tensor_subtract, etc)
     - 🏗️ update _tensor_broadcast_scalar_fn to two versions (binary and unary) (current implementation is binary)
     - 🏗️ standardize naming (child vs parent?? left/right variable/entry/arg??)
-        - move toward arg/result naming scheme
+        - move toward input/output naming scheme
+        - change diff_arg_t to input_t
     - 🏗️ start test suite
         - add test built target
         - add one main driver which calls test_variable, test_tensor, test_shape, test_grad, etc
@@ -101,4 +104,7 @@ OOP Conventions:
 - module-internal (static) functions always `[FUNCTION_NAME]`
 - constructors: `[MODULE_NAME]_specifics`
     - can no longer have variable called eg `new_tensor`, must be _new_tensor
+
+EXPERIMENTs:
+(1) Learn AX + B = Y
 

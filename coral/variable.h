@@ -32,40 +32,40 @@ static inline bool is_scalar(variable_t* variable){
 
 typedef variable_t* (* variable_binary_op_t)(variable_t* left_variable, variable_t* right_variable);
 typedef variable_t* (* variable_unary_op_t)(variable_t* left_variable, variable_t* right_variable);
-typedef tensor_t* (* variable_binary_grad_op_t)(variable_t* arg, variable_t* other_arg, variable_t* result);
-typedef tensor_t* (* variable_unary_grad_op_t)(variable_t* arg, variable_t* result);
+typedef tensor_t* (* variable_binary_grad_op_t)(variable_t* input, variable_t* other_input, variable_t* output);
+typedef tensor_t* (* variable_unary_grad_op_t)(variable_t* input, variable_t* output);
 typedef void (* generic_op_t)();
 
 #define variable_grad_op_t generic_op_t
 
-// differentiable argument
+// differentiable input
 typedef struct {
-    variable_t* arg;
+    variable_t* variable;
     variable_grad_op_t grad_op;
-} diff_arg_t;
+} input_t;
 
-static inline diff_arg_t* diff_arg_new(variable_t* arg, variable_grad_op_t grad_op){
-    diff_arg_t* new_diff_arg = (diff_arg_t*) malloc(sizeof(diff_arg_t));
-    new_diff_arg->arg = arg;
-    new_diff_arg->grad_op = grad_op;
-    return new_diff_arg;
+static inline input_t* input_new(variable_t* input, variable_grad_op_t grad_op){
+    input_t* new_input = (input_t*) malloc(sizeof(input_t));
+    new_input->variable = input;
+    new_input->grad_op = grad_op;
+    return new_input;
 }
 
 struct grad_meta{
     int ref_count;
-    int num_args; // 0 for leaf
-    diff_arg_t* args[2];
+    int num_inputs; // 0 for leaf
+    input_t* inputs[2];
 };
 
 static inline grad_meta_t* grad_meta_new(){
     grad_meta_t* new_grad_meta = (grad_meta_t*) malloc(sizeof(grad_meta_t));
     new_grad_meta->ref_count = 0;
-    new_grad_meta->num_args = 0;
+    new_grad_meta->num_inputs = 0;
     return new_grad_meta;
 }
 
-void variable_display(variable_t* variable);
-void variable_display_with_gradient(variable_t* variable);
+void variable_display(variable_t* variable, char* name);
+void variable_display_with_gradient(variable_t* variable, char* name);
 
 void variable_in_place_apply_index_fn(variable_t* variable, tensor_index_fn_t index_fn);
 void variable_in_place_view_as(variable_t* variable, int num_dims, ...);

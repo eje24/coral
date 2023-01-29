@@ -149,7 +149,7 @@ void tensor_display_dim_1(tensor_t* tensor){
     for(size_t dim0_index = 0; dim0_index < tensor->shape->dims[0]; dim0_index++){
         printf("%f ", tensor->data[dim0_index]);
     }
-    printf("\n");
+    printf("\n\n");
 }
 
 void tensor_display_dim_2(tensor_t* tensor){
@@ -160,6 +160,7 @@ void tensor_display_dim_2(tensor_t* tensor){
         }
         printf("\n");
     } 
+    printf("\n");
 }
 
 void tensor_display_dim_3(tensor_t* tensor){
@@ -173,6 +174,7 @@ void tensor_display_dim_3(tensor_t* tensor){
         }
         printf("\n");
     } 
+    printf("\n");
 }
 
 void tensor_display(tensor_t* tensor){
@@ -272,6 +274,8 @@ void recursive_in_place_broadcast_fn(tensor_t* dest_tensor, tensor_t* source_ten
 }
 
 void in_place_broadcast_fn(tensor_t* dest_tensor, tensor_t* source_tensor1, tensor_t* source_tensor2, tensor_entry_binary_fn_t tensor_entry_binary_fn){
+    NDEBUG_ASSERT(dest_tensor != source_tensor1 && dest_tensor != source_tensor2, "Destination and source tensors cannot alias the same memory - undefined behavior!");
+    NDEBUG_ASSERT(shape_equal(shape_get_broadcast_shape(source_tensor1->shape, source_tensor2->shape), dest_tensor->shape), "Destination tensor has improper shape!");
     NDEBUG_ASSERT(tensor_broadcast_compatible(source_tensor1, source_tensor2), "Tensors are not broadcast compatible!\n");
     int source_dims1 = TENSOR_NUM_DIMS(source_tensor1);
     int source_dims2 = TENSOR_NUM_DIMS(source_tensor2);
@@ -294,22 +298,32 @@ tensor_t* tensor_broadcast_fn(tensor_t* left_tensor, tensor_t* right_tensor, ten
 
 /**
  * MUTATING FUNCTIONS
+ * tensor_in_place_op(left_tensor, right_tensor) sets
+ * left_tensor <- op(left_tensor, right_tensor)
 */
 
+
+/**
+ * Adds right_tensor to left_tensor
+ */
 void tensor_in_place_add(tensor_t* left_tensor, tensor_t* right_tensor){
-    in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &tensor_entry_add);
+    NDEBUG_ASSERT(shape_equal(shape_get_broadcast_shape(left_tensor->shape, right_tensor->shape), left_tensor->shape), "Left tensor has improper shape for in place operation!");
+    left_tensor->data = tensor_add(left_tensor, right_tensor)->data;
 }
 
 void tensor_in_place_subtract(tensor_t* left_tensor, tensor_t* right_tensor){
-    in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &tensor_entry_subtract);
+    NDEBUG_ASSERT(shape_equal(shape_get_broadcast_shape(left_tensor->shape, right_tensor->shape), left_tensor->shape), "Left tensor has improper shape for in place operation!");
+    left_tensor->data = tensor_subtract(left_tensor, right_tensor)->data;
 }
 
 void tensor_in_place_multiply(tensor_t* left_tensor, tensor_t* right_tensor){
-    in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &tensor_entry_multiply);
+    NDEBUG_ASSERT(shape_equal(shape_get_broadcast_shape(left_tensor->shape, right_tensor->shape), left_tensor->shape), "Left tensor has improper shape for in place operation!");
+    left_tensor = tensor_multiply(left_tensor, right_tensor);
 }
 
 void tensor_in_place_divide(tensor_t* left_tensor, tensor_t* right_tensor){
-    in_place_broadcast_fn(left_tensor, left_tensor, right_tensor, &tensor_entry_divide);
+    NDEBUG_ASSERT(shape_equal(shape_get_broadcast_shape(left_tensor->shape, right_tensor->shape), left_tensor->shape), "Left tensor has improper shape for in place operation!");
+    left_tensor = tensor_divide(left_tensor, right_tensor);
 }
 
 void tensor_in_place_multiply_by_scalar(tensor_t* tensor, tensor_entry_t value){
