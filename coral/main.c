@@ -6,7 +6,7 @@
 
 int main() {
     variable_t* x = variable_new(3, 2, 2, 4);
-    variable_t* y = variable_new(2, 2, 4);
+    variable_t* y = variable_new(3, 2, 2, 1);
     variable_t* z = variable_new(1, 4);
     variable_set_to_scalar_value(x, 10);
     variable_in_place_apply_index_fn(y, index_identity);

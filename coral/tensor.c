@@ -189,6 +189,8 @@ void tensor_display(tensor_t* tensor){
         case 3:
             tensor_display_dim_3(tensor);
             break;
+        default:
+            NDEBUG(0, "Display not supported for tensors of dimension greater than three!");
     }
 }
 
@@ -278,6 +280,8 @@ void recursive_in_place_broadcast_fn(tensor_t* dest_tensor, tensor_t* source_ten
 void in_place_broadcast_fn(tensor_t* dest_tensor, tensor_t* source_tensor1, tensor_t* source_tensor2, tensor_entry_binary_fn_t tensor_entry_binary_fn){
     NDEBUG_ASSERT(dest_tensor != source_tensor1 && dest_tensor != source_tensor2, "Destination and source tensors cannot alias the same memory - undefined behavior!");
     NDEBUG_ASSERT(shape_equal(shape_get_broadcast_shape(source_tensor1->shape, source_tensor2->shape), dest_tensor->shape), "Destination tensor has improper shape!");
+    shape_display(source_tensor1->shape);
+    shape_display(source_tensor2->shape);
     NDEBUG_ASSERT(tensor_broadcast_compatible(source_tensor1, source_tensor2), "Tensors are not broadcast compatible!\n");
     int source_dims1 = TENSOR_NUM_DIMS(source_tensor1);
     int source_dims2 = TENSOR_NUM_DIMS(source_tensor2);
