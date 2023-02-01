@@ -249,8 +249,9 @@ static inline tensor_entry_t tensor_entry_abs(tensor_entry_t entry){
 void base_in_place_broadcast(tensor_t* dest_tensor, tensor_t* source_tensor1, tensor_t* source_tensor2, size_t dest_offset, size_t offset1, size_t offset2, int dim_index, tensor_entry_binary_fn_t tensor_entry_binary_fn){
     size_t offset1_diff = (source_tensor1->shape->dims[dim_index] > 1) ? source_tensor1->shape->strides[dim_index] : 0;
     size_t offset2_diff = (source_tensor2->shape->dims[dim_index] > 1) ? source_tensor2->shape->strides[dim_index] : 0;
-    size_t dest_offset_diff = dest_tensor->shape->strides[dim_index]; 
-    for(size_t index = 0; index < dest_tensor->shape->dims[dim_index]; index++){
+    size_t dest_offset_diff = (dest_tensor->shape->dims[dim_index] > 1) ? dest_tensor->shape->strides[dim_index] : 0; 
+    size_t dim_length = MAX(source_tensor1->shape->dims[dim_index], source_tensor2->shape->dims[dim_index]);
+    for(size_t index = 0; index < dim_length; index++){
         tensor_entry_t source_entry1 = tensor_get_entry(source_tensor1, offset1 + index * offset1_diff);
         tensor_entry_t source_entry2 = tensor_get_entry(source_tensor2, offset2 + index * offset2_diff);
         tensor_entry_t new_entry = (*tensor_entry_binary_fn)(source_entry1, source_entry2);
@@ -267,8 +268,9 @@ void recursive_in_place_broadcast_fn(tensor_t* dest_tensor, tensor_t* source_ten
     }
     size_t offset1_diff = (source_tensor1->shape->dims[dim_index] > 1) ? source_tensor1->shape->strides[dim_index] : 0;
     size_t offset2_diff = (source_tensor2->shape->dims[dim_index] > 1) ? source_tensor2->shape->strides[dim_index] : 0;
-    size_t dest_offset_diff = dest_tensor->shape->strides[dim_index];
-    for(size_t index = 0; index < dest_tensor->shape->dims[dim_index]; index++){
+    size_t dest_offset_diff = (dest_tensor->shape->dims[dim_index] > 1) ? dest_tensor->shape->strides[dim_index] : 0;
+    size_t dim_length = MAX(source_tensor1->shape->dims[dim_index], source_tensor2->shape->dims[dim_index]);
+    for(size_t index = 0; index < dim_length; index++){
         recursive_in_place_broadcast_fn(dest_tensor, source_tensor1, source_tensor2, dest_offset + index * dest_offset_diff, offset1 + index * offset1_diff, offset2 + index * offset2_diff, dim_index + 1, tensor_entry_binary_fn);
     }
 }
@@ -291,9 +293,21 @@ void in_place_broadcast_fn(tensor_t* dest_tensor, tensor_t* source_tensor1, tens
 // TODO : allow for broadcasting of different sizes
 tensor_t* tensor_broadcast_fn(tensor_t* left_tensor, tensor_t* right_tensor, tensor_entry_binary_fn_t tensor_entry_binary_fn){
     // ensure that left_tensor->num_dims >= right_tensor->num_dims
-    tensor_t* new_tensor = (TENSOR_NUM_DIMS(left_tensor) > TENSOR_NUM_DIMS(right_tensor)) ? tensor_new_like(left_tensor) : tensor_new_like(right_tensor);
+    tensor_t* new_tensor = tensor_new(shape_get_broadcast_shape(left_tensor->shape, right_tensor->shape));
     in_place_broadcast_fn(new_tensor, left_tensor, right_tensor, tensor_entry_binary_fn);
     return new_tensor;
+}
+
+/**
+ * sums along a subset of the dimensions so that the resulting tensor has shape target_shape
+*/
+tensor_t* tensor_reduce_to_shape(tensor_t* tensor, shape_t* target_shape){
+    NDEBUG_ASSERT(shape_broadcast_compatible(tensor->shape, target_shape), "Tensor is not compatible with target shape.");
+    NDEBUG_ASSERT(target_shape->num_dims <= TENSOR_NUM_DIMS(tensor), "Target shape has too many dimensions.");
+    shape_t* extended_target_shape = shape_extend_to_dims(target_shape, TENSOR_NUM_DIMS(tensor));
+    tensor_t* reduced_tensor = tensor_new(extended_target_shape);
+    recursive_in_place_broadcast_fn(reduced_tensor, reduced_tensor, tensor, 0, 0, 0, 0, &tensor_entry_add);
+    return tensor_view_as_shape(reduced_tensor, target_shape);
 }
 
 /**

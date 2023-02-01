@@ -19,7 +19,8 @@ static inline int get_ref_count(variable_t* variable){
 static void update_unary_grad(input_t* input, variable_t* output){
     variable_unary_grad_op_t gradient_fn = (variable_unary_grad_op_t) (input->grad_op);
     tensor_t* gradient_update = (*gradient_fn)(input->variable, output);
-    tensor_in_place_add(input->variable->gradient, gradient_update);
+    tensor_t* reduced_gradient_update = tensor_reduce_to_shape(gradient_update, input->variable->gradient->shape);
+    tensor_in_place_add(input->variable->gradient, reduced_gradient_update);
     decrement_ref_count(input->variable);
 }
 
@@ -28,7 +29,10 @@ static void update_unary_grad(input_t* input, variable_t* output){
 static void update_binary_grad(input_t* input, input_t* other_input, variable_t* output){
     variable_binary_grad_op_t gradient_fn = (variable_binary_grad_op_t) (input->grad_op);
     tensor_t* gradient_update = (*gradient_fn)(input->variable, other_input->variable, output);
-    tensor_in_place_add(input->variable->gradient, gradient_update);
+    tensor_t* reduced_gradient_update = tensor_reduce_to_shape(gradient_update, input->variable->gradient->shape);
+    printf("REDUCED GRADIENT:\n\n");
+    tensor_display(reduced_gradient_update);
+    tensor_in_place_add(input->variable->gradient, reduced_gradient_update);
     decrement_ref_count(input->variable);
 }
 
@@ -43,8 +47,6 @@ static inline void update_binary_grads(input_t* left_input, input_t* right_input
 // so as recurse in a way that respects gradient
 // graph's topological ordering
 static void actual_backwards(variable_t* root){
-    printf("Running actual grad!");
-    variable_display_with_gradient(root, "root");
     if(root->grad_meta->num_inputs == 1){
         input_t* input = root->grad_meta->inputs[0];
         update_unary_grad(input, root);

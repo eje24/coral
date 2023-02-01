@@ -136,6 +136,8 @@ void variable_set_to_scalar(variable_t* variable, tensor_entry_t value){
 
 /**
  * GRADIENTS: return grad with respect to input, possible as a function of both input and other_input
+ * NOTE: grad functions are shape agnostic, the reduction to the correct shape occurs with the call to tensor_reduce_to_shape in grad.c
+ * to account for operations in which broadcasting occurs
 */
 
 
@@ -176,7 +178,7 @@ variable_t* subtract(variable_t* left_variable, variable_t* right_variable, bool
     tensor_t* new_tensor = tensor_subtract(left_variable->tensor, right_variable->tensor);
     variable_t* new_variable = variable_new_from_tensor(new_tensor);
     if(use_grad){
-        set_binary_grad_meta(new_variable, left_variable, right_variable, &subtract_backwards_grad, &subtract_backwards_grad);
+        set_binary_grad_meta(new_variable, left_variable, right_variable, &add_backwards_grad, &subtract_backwards_grad);
     } 
     return new_variable;
 }

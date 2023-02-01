@@ -21,6 +21,9 @@ TODO:
     - ✅ [#1] add in ability to construct different views of the same tensor (just have another tensor pointing to the same data, but with different num_rows, num_columns) as well as reductions (sum along dimensions)
     - ✅ Switch naming convention so as to remove function names starting with `_` (see naming convention below)
         - see https://softwareengineering.stackexchange.com/a/115564
+    - 🏗️ add differentiable variable multiply by scalar function
+    - 🏗️ add matrix multiplication
+    - 🏗️ add module_t
     - 🏗️ add new scalar_grad_op function, for functions which use scalars (ie, tensor_divide_by_scalar, etc)
     - 🏗️ Add ability to differentiate through re-shape operations
         - 🏗️ add a reshape grad, which just reshapes result grad and multiplies through via chain rule
@@ -36,7 +39,7 @@ TODO:
     - 🏗️ Add "fastpath" for broadcasting when two shapes (or shape-suffixes) are the same
     - 🏗️ functions which do not modify should have const arguments (_tensor_add, _tensor_subtract, etc)
     - 🏗️ update _tensor_broadcast_scalar_fn to two versions (binary and unary) (current implementation is binary)
-    - 🏗️ standardize naming (child vs parent?? left/right variable/entry/arg??)
+    - ✅ standardize naming (child vs parent?? left/right variable/entry/arg??)
         - move toward input/output naming scheme
         - change diff_arg_t to input_t
     - 🏗️ start test suite

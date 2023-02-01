@@ -72,6 +72,8 @@ void tensor_set_to_fn_value(tensor_t* tensor, tensor_index_fn_t index_fn);
 
 void tensor_display(tensor_t* tensor);
 
+tensor_t* tensor_reduce_to_shape(tensor_t* tensor, shape_t* target_shape);
+
 void tensor_in_place_add(tensor_t* left_tensor, tensor_t* right_tensor);
 void tensor_in_place_subtract(tensor_t* left_tensor, tensor_t* right_tensor);
 void tensor_in_place_multiply(tensor_t* left_tensor, tensor_t* right_tensor);

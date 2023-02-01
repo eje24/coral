@@ -83,7 +83,7 @@ shape_t* shape_extend_to_dims(shape_t* shape, int num_dims){
     return shape_new(num_dims, dims);
 }
 
-void shape_display(shape_t* shape){
+void shape_verbose_display(shape_t* shape){
     printf("Size: %zu\n", shape->size);
     printf("Dimensions: ");
     printf("%zu", shape->dims[0]);
@@ -95,6 +95,15 @@ void shape_display(shape_t* shape){
     printf("%zu", shape->strides[0]);
     for(int index = 1; index < shape->num_dims; index++){
         printf(" x %zu", shape->strides[index]);
+    }
+    printf("\n");
+}
+
+void shape_display(shape_t* shape){
+    printf("Dimensions: ");
+    printf("%zu", shape->dims[0]);
+    for(int index = 1; index < shape->num_dims; index++){
+        printf(" x %zu", shape->dims[index]);
     }
     printf("\n");
 }

@@ -20,6 +20,7 @@ bool shape_equal(shape_t* left_shape, shape_t* right_shape);
 shape_t* shape_get_broadcast_shape(shape_t* left_shape, shape_t* right_shape);
 bool shape_broadcast_compatible(shape_t* left_shape, shape_t* right_shape);
 shape_t* shape_extend_to_dims(shape_t* shape, int num_dims);
+void shape_verbose_display(shape_t* shape);
 void shape_display(shape_t* shape);
 
 static inline bool shape_is_scalar(shape_t* shape){
