@@ -1,5 +1,7 @@
 # coral
 
+TODO: ask DALL-E or similar to generate a cool logo based on a fusion of Coral and a neural network.
+
 A simple PyTorch-inspired deep learning framework and tensor library in C.
 
 OVERVIEW OF COMPONENTS:
