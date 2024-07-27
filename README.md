@@ -3,6 +3,7 @@
   <img width="35%" src="assets/coral.png">
 </p>
 <p align="center">
+    <b> Coral </b> <br> 
   <b>A tensor algebra and automatic differentiation library written in C.</b>
 </p>
 
