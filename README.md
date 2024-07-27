@@ -2,10 +2,8 @@
 <p align="center">
   <img width="35%" src="assets/coral.png">
 </p>
-<p align="center">
-    <b> Coral </b> <br> 
-  <b>A tensor algebra and automatic differentiation library written in C.</b>
-</p>
+<h1 align="center" style="">Coral</h1> 
+  <h3 align="center">A tensor algebra and automatic differentiation library written in C.</h3>
 
 TODO: ask DALL-E or similar to generate a cool logo based on a fusion of Coral and a neural network.
 
